@@ -5,7 +5,7 @@ Terraform module which deploys into an existing VPC, creates the required subnet
 ## Usage
 
 ```hcl
-// Create VPC and IGW
+// Create VPC
 resource "aws_vpc" "cato-vpc" {
   cidr_block = var.vpc_range
   tags = {
@@ -13,7 +13,7 @@ resource "aws_vpc" "cato-vpc" {
   }
 }
 
-# Internet Gateway - Create only if vpc_id is not provided
+# Internet Gateway
 resource "aws_internet_gateway" "internet_gateway" {
   tags = {
     Name = "${var.site_name}-IGW2"
