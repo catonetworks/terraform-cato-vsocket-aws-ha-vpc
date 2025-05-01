@@ -1,5 +1,4 @@
 ## The following attributes are exported:
-# output "internet_gateway_id" { value = local.create_igw ? aws_internet_gateway.this["internet_gateway"].id : var.internet_gateway_id }
 output "sg_internal" { value = aws_security_group.internal_sg.id }
 output "sg_external" { value = aws_security_group.external_sg.id }
 output "mgmt_eni_primary_id" { value = aws_network_interface.mgmteni_primary.id }
@@ -16,17 +15,17 @@ output "mgmt_subnet_id" { value = aws_subnet.mgmt_subnet.id }
 output "wan_subnet_id" { value = aws_subnet.wan_subnet.id }
 output "lan_subnet_primary_id" { value = aws_subnet.lan_subnet_primary.id }
 output "lan_subnet_secondary_id" { value = aws_subnet.lan_subnet_secondary.id }
-# output "vpc_id" { value = local.create_vpc ? aws_vpc.this["vpc"].id : var.vpc_id }
 output "mgmt_route_table_id" { value = aws_route_table.mgmtrt.id }
 output "wan_route_table_id" { value = aws_route_table.wanrt.id }
 output "lan_route_table_id" { value = aws_route_table.lanrt.id }
-output "socket_site_id" { value = module.vsocket-aws-ha.socket_site_id }
-output "socket_site_serial" { value = module.vsocket-aws-ha.socket_site_serial }
-output "secondary_socket_site_serial" { value = module.vsocket-aws-ha.secondary_socket_site_serial }
-output "aws_iam_role_name" { value = module.vsocket-aws-ha.aws_iam_role_name }
-output "aws_iam_policy_arn" { value = module.vsocket-aws-ha.aws_iam_policy_arn }
-output "aws_iam_instance_profile_name" { value = module.vsocket-aws-ha.aws_iam_instance_profile_name }
-output "aws_availability_zones" { value = module.vsocket-aws-ha.aws_availability_zones }
-output "aws_instance_id" { value = module.vsocket-aws-ha.aws_instance_id }
-output "cato_account_snapshot_site_secondary_id" { value = module.vsocket-aws-ha.cato_account_snapshot_site_secondary_id }
-output "aws_instance_vSocket_Secondary_id" { value = module.vsocket-aws-ha.aws_instance_vSocket_Secondary_id }
+# output "socket_site_id" { value = cato_accountShanpshotSite.aws-site.id }
+# output "socket_site_serial" { value = module.vsocket-aws-ha.socket_site_serial }
+# output "secondary_socket_site_serial" { value = module.vsocket-aws-ha.secondary_socket_site_serial }
+output "aws_iam_role_name" { value = aws_iam_role.cato_ha_role.name }
+output "aws_iam_policy_arn" { value = aws_iam_policy.cato_ha_policy.name }
+output "aws_iam_instance_profile_name" { value = aws_iam_instance_profile.cato_ha_instance_profile.name }
+output "aws_availability_zones_out" { value = data.aws_availability_zones.available }
+output "aws_instance_id" { value = aws_instance.primary_vsocket.id }
+# output "cato_account_snapshot_site_secondary_id" { value = module.vsocket-aws-ha.cato_account_snapshot_site_secondary_id }
+output "aws_instance_vSocket_Secondary_id" { value = aws_instance.vsocket_secondary.id }
+

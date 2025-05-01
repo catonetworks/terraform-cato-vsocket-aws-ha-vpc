@@ -21,14 +21,14 @@ variable "vpc_id" {
   default     = null
 }
 
-# variable "vpc_range" {
-#   type        = string
-#   description = <<EOT
-#   	Choose a unique range for your new VPC that does not conflict with the rest of your Wide Area Network.
-#     The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X
-# 	EOT
-#   default = null
-# }
+variable "vpc_range" {
+  type        = string
+  description = <<EOT
+  	Choose a unique range for your new VPC that does not conflict with the rest of your Wide Area Network.
+    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X
+	EOT
+  default = null
+}
 
 variable "internet_gateway_id" {
   description = "Specify an Internet Gateway ID to use. If not specified, a new Internet Gateway will be created."
@@ -171,4 +171,22 @@ variable "tags" {
   description = "Tags to be appended to AWS resources"
   type        = map(string)
   default     = {}
+}
+
+variable "connection_type" {
+  description = "Model of Cato vsocket"
+  type        = string
+  default     = "SOCKET_AWS1500"
+}
+
+variable "ebs_disk_size" {
+  description = "Size of disk"
+  type        = number
+  default     = 32
+}
+
+variable "ebs_disk_type" {
+  description = "Size of disk"
+  type        = string
+  default     = "gp2"
 }
