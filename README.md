@@ -1,26 +1,10 @@
 # CATO VSOCKET AWS HA VPC Terraform module
 
-Terraform module which deploys into an existing VPC, creates the required subnets, network interfaces, security groups, route tables, an AWS Socket HA Site in the Cato Management Application (CMA), and deploys a primary and secondary virtual socket VM instance in AWS and configures them as HA.
+Terraform module which deploys into an new VPC, creates the required subnets, network interfaces, security groups, route tables, an AWS Socket HA Site in the Cato Management Application (CMA), and deploys a primary and secondary virtual socket VM instance in AWS and configures them as HA.
 
 ## Usage
 
 ```hcl
-// Create VPC
-resource "aws_vpc" "cato-vpc" {
-  cidr_block = var.vpc_range
-  tags = {
-    Name = "${var.site_name}-VPC"
-  }
-}
-
-# Internet Gateway
-resource "aws_internet_gateway" "internet_gateway" {
-  tags = {
-    Name = "${var.site_name}-IGW2"
-  }
-  vpc_id = aws_vpc.cato-vpc.id
-}
-
 // Use data source to look up site_location 
 data "cato_siteLocation" "ny" {
   filters = [{
@@ -41,10 +25,9 @@ data "cato_siteLocation" "ny" {
 }
 
 module "vsocket-aws-ha" {
-  depends_on = [ aws_vpc.cato-vpc, aws_internet_gateway.internet_gateway ]
-  source                     = "catonetworks/vsocket-aws-ha-vnet/cato"
-  token                      = var.cato_token_base
-  account_id                 = var.account_id_base
+  source                     = "catonetworks/vsocket-aws-ha-vpc/cato"
+  token                      = var.token
+  account_id                 = var.account_id
   vpc_id                     = aws_vpc.cato-vpc.id
   internet_gateway_id        = aws_internet_gateway.internet_gateway.id
   key_pair                   = "Your key pair"
@@ -52,6 +35,7 @@ module "vsocket-aws-ha" {
   site_name                  = "Your-Cato-site-name-here"
   site_description           = "Your Cato site Description here"
   site_type                  = "CLOUD_DC"
+  vpc_range                  = "10.32.0.0/18"
   subnet_range_mgmt          = "10.32.1.0/24"
   subnet_range_wan           = "10.32.2.0/24"
   subnet_range_lan_primary   = "10.32.3.0/24"
