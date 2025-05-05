@@ -1,26 +1,34 @@
 # CATO VSOCKET AWS HA VPC Terraform module
 
-Terraform module which deploys into an existing VPC, creates the required subnets, network interfaces, security groups, route tables, an AWS Socket HA Site in the Cato Management Application (CMA), and deploys a primary and secondary virtual socket VM instance in AWS and configures them as HA.
+Terraform module which deploys into an new or existing VPC and Internet Gateway, creates the required subnets, network interfaces, security groups, route tables, an AWS Socket HA Site in the Cato Management Application (CMA), and deploys a primary and secondary virtual socket VM instance in AWS and configures them as HA.
+
+For the vpc_id and internetGateway leave null to create new or add an id of the already created resources to use existing.
 
 ## Usage
 
 ```hcl
+provider "cato" {
+  baseurl    = var.baseurl
+  account_id = var.account_id
+  token      = var.token
+}
+
 // Use data source to look up site_location 
 data "cato_siteLocation" "ny" {
   filters = [{
-    field = "city"
-    search = "New York"
+    field     = "city"
+    search    = "New York"
     operation = "startsWith"
-  },
-  {
-    field = "state_name"
-    search = "New York"
-    operation = "exact"
-  },
- {
-    field = "country_name"
-    search = "United"
-    operation = "contains"
+    },
+    {
+      field     = "state_name"
+      search    = "New York"
+      operation = "exact"
+    },
+    {
+      field     = "country_name"
+      search    = "United"
+      operation = "contains"
   }]
 }
 
@@ -28,35 +36,40 @@ module "vsocket-aws-ha" {
   source                     = "catonetworks/vsocket-aws-ha-vpc/cato"
   token                      = var.token
   account_id                 = var.account_id
-  vpc_id                     = aws_vpc.cato-vpc.id
-  internet_gateway_id        = aws_internet_gateway.internet_gateway.id
-  key_pair                   = "Your key pair"
+  key_pair                   = "cato-eu-north-1"
   region                     = "eu-north-1"
   site_name                  = "Your-Cato-site-name-here"
   site_description           = "Your Cato site Description here"
   site_type                  = "CLOUD_DC"
-  vpc_range                  = "10.32.0.0/18"
-  subnet_range_mgmt          = "10.32.1.0/24"
-  subnet_range_wan           = "10.32.2.0/24"
-  subnet_range_lan_primary   = "10.32.3.0/24"
-  subnet_range_lan_secondary = "10.32.4.0/24"
-  mgmt_eni_primary_ip        = "10.32.1.5"
-  mgmt_eni_secondary_ip      = "10.32.1.6"
-  wan_eni_primary_ip         = "10.32.2.5"
-  wan_eni_secondary_ip       = "10.32.2.6"
-  lan_eni_primary_ip         = "10.32.3.5"
-  lan_eni_secondary_ip       = "10.32.4.5"
+  vpc_id                     = null
+  internetGateway            = null 
+  vpc_range                  = "10.132.0.0/18"
+  subnet_range_mgmt          = "10.132.1.0/24"
+  subnet_range_wan           = "10.132.2.0/24"
+  subnet_range_lan_primary   = "10.132.3.0/24"
+  subnet_range_lan_secondary = "10.132.4.0/24"
+  mgmt_eni_primary_ip        = "10.132.1.5"
+  mgmt_eni_secondary_ip      = "10.132.1.6"
+  wan_eni_primary_ip         = "10.132.2.5"
+  wan_eni_secondary_ip       = "10.132.2.6"
+  lan_eni_primary_ip         = "10.132.3.5"
+  lan_eni_secondary_ip       = "10.132.4.5"
   ingress_cidr_blocks        = ["0.0.0.0/0"]
-  site_location              = {
-    city = data.cato_siteLocation.ny.locations[0].city
-    country_code = data.cato_siteLocation.ny.locations[0].country_code
-    state_code = data.cato_siteLocation.ny.locations[0].state_code
-    timezone = data.cato_siteLocation.ny.locations[0].timezone[0]
+  lan_ingress_cidr_blocks    = ["0.0.0.0/0"]
+  site_location = {
+    city         = "London"
+    country_code = "GB"
+    state_code   = null
+    timezone     = "Europe/London"
   }
   tags = {
-    Test                     = "Test tag"
-    Test2                    = "Test2 tag"
+    Test  = "Test tag"
+    Test2 = "Test2 tag"
   }
+}
+
+output "vsocket-ha-output" {
+  value = module.vsocket-aws-ha
 }
 ```
 

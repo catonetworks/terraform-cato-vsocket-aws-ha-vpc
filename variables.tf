@@ -21,6 +21,12 @@ variable "vpc_id" {
   default     = null
 }
 
+variable "internetGateway" {
+  description = "Specify a Internet Gateway ID to use. If not specified, a new Internet Gateway will be created."
+  type = string
+  default = null
+}
+
 variable "vpc_range" {
   type        = string
   description = <<EOT
@@ -82,6 +88,16 @@ variable "region" {
 }
 
 variable "ingress_cidr_blocks" {
+  type        = list(any)
+  description = <<EOT
+  	Set CIDR to receive traffic from the specified IPv4 CIDR address ranges
+	For example x.x.x.x/32 to allow one specific IP address access, 0.0.0.0/0 to allow all IP addresses access, or another CIDR range
+    Best practice is to allow a few IPs as possible
+    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X
+	EOT  
+}
+
+variable "lan_ingress_cidr_blocks" {
   type        = list(any)
   description = <<EOT
   	Set CIDR to receive traffic from the specified IPv4 CIDR address ranges
