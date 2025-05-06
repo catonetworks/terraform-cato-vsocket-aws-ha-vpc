@@ -1,13 +1,4 @@
 ########## Start AWS VPC and Network Configurations Resources ##########
-provider "cato" {
-  baseurl = var.baseurl
-  account_id = var.account_id
-  token = var.token
-}
-
-provider "aws" {
-  region = var.region
-}
 
 // Create VPC
 resource "aws_vpc" "cato-vpc" {

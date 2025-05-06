@@ -1,6 +1,7 @@
 ## The following attributes are exported:
 output "sg_internal" { value = aws_security_group.internal_sg.id }
-output "sg_external" { value = aws_security_group.external_sg.id }
+output "sg_external_mgmt" { value = aws_security_group.external_sg_mgmt }
+output "sg_external_wan" { value = aws_security_group.external_sg_wan }
 output "mgmt_eni_primary_id" { value = aws_network_interface.mgmteni_primary.id }
 output "wan_eni_primary_id" { value = aws_network_interface.waneni_primary.id }
 output "lan_eni_primary_id" { value = aws_network_interface.laneni_primary.id }

@@ -83,10 +83,6 @@ variable "site_location" {
 }
 
 ## VPC Module Variables
-variable "region" {
-  type = string
-}
-
 variable "ingress_cidr_blocks" {
   type        = list(any)
   description = <<EOT
