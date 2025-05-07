@@ -21,19 +21,13 @@ variable "vpc_id" {
   default     = null
 }
 
-variable "internetGateway" {
-  description = "Specify a Internet Gateway ID to use. If not specified, a new Internet Gateway will be created."
-  type = string
-  default = null
-}
-
 variable "vpc_range" {
   type        = string
   description = <<EOT
   	Choose a unique range for your new VPC that does not conflict with the rest of your Wide Area Network.
     The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X
 	EOT
-  default = null
+  default     = null
 }
 
 variable "internet_gateway_id" {

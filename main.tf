@@ -1,8 +1,7 @@
 ########## Start AWS VPC and Network Configurations Resources ##########
-
 // Create VPC
 resource "aws_vpc" "cato-vpc" {
-  count = var.vpc_id==null ? 1 : 0
+  count      = var.vpc_id == null ? 1 : 0
   cidr_block = var.vpc_range
   tags = {
     Name = "${var.site_name}-VPC"
@@ -11,11 +10,11 @@ resource "aws_vpc" "cato-vpc" {
 
 # Internet Gateway
 resource "aws_internet_gateway" "internet_gateway" {
-  count = var.internetGateway==null ? 1 : 0
+  count = var.internet_gateway_id == null ? 1 : 0
   tags = {
-    Name = "${var.site_name}-IGW2"
+    Name = "${var.site_name}-IGW"
   }
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
 }
 
 # Lookup data from region and VPC - Always needed for availability zones
@@ -25,7 +24,7 @@ data "aws_availability_zones" "available_zones" {
 
 # Subnets
 resource "aws_subnet" "mgmt_subnet" {
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_mgmt
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
@@ -34,7 +33,7 @@ resource "aws_subnet" "mgmt_subnet" {
 }
 
 resource "aws_subnet" "wan_subnet" {
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_wan
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
@@ -43,7 +42,7 @@ resource "aws_subnet" "wan_subnet" {
 }
 
 resource "aws_subnet" "lan_subnet_primary" {
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_lan_primary
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
@@ -52,7 +51,7 @@ resource "aws_subnet" "lan_subnet_primary" {
 }
 
 resource "aws_subnet" "lan_subnet_secondary" {
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_lan_secondary
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
@@ -60,12 +59,11 @@ resource "aws_subnet" "lan_subnet_secondary" {
   }
 }
 
-
 # Internal and External Security Groups
 resource "aws_security_group" "internal_sg" {
   name        = "${var.site_name}-Internal-SG"
   description = "CATO LAN Security Group - Allow all traffic Inbound"
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id      = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   ingress = [
     {
       description      = "Allow all traffic Inbound from Ingress CIDR Blocks"
@@ -100,7 +98,7 @@ resource "aws_security_group" "internal_sg" {
 resource "aws_security_group" "external_sg_mgmt" {
   name        = "${var.site_name}-External-SG-MGMT"
   description = "CATO MGMT Security Group - Allow HTTPS In"
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id      = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   ingress = [
     {
       description      = "Allow HTTPS In"
@@ -146,7 +144,7 @@ resource "aws_security_group" "external_sg_mgmt" {
 resource "aws_security_group" "external_sg_wan" {
   name        = "${var.site_name}-External-SG-WAN"
   description = "CATO WAN Security Group - Allow all out, none in"
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id      = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   egress = [
     {
       description      = "Allow all traffic Outbound"
@@ -275,21 +273,21 @@ resource "aws_eip_association" "mgmteip_assoc_secondary" {
 
 # Routing Tables
 resource "aws_route_table" "wanrt" {
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   tags = {
     Name = "${var.site_name}-WAN-RT"
   }
 }
 
 resource "aws_route_table" "mgmtrt" {
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   tags = {
     Name = "${var.site_name}-MGMT-RT"
   }
 }
 
 resource "aws_route_table" "lanrt" {
-  vpc_id = var.vpc_id==null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   tags = {
     Name = "${var.site_name}-LAN-RT"
   }
@@ -299,13 +297,13 @@ resource "aws_route_table" "lanrt" {
 resource "aws_route" "wan_route" {
   route_table_id         = aws_route_table.wanrt.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id = var.internetGateway==null ? aws_internet_gateway.internet_gateway[0].id : var.internetGateway
+  gateway_id             = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id
 }
 
 resource "aws_route" "mgmt_route" {
   route_table_id         = aws_route_table.mgmtrt.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id = var.internetGateway==null ? aws_internet_gateway.internet_gateway[0].id : var.internetGateway
+  gateway_id             = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id
 }
 
 resource "aws_route" "lan_route" {
@@ -449,7 +447,7 @@ resource "null_resource" "sleep_300_seconds" {
   provisioner "local-exec" {
     command = "sleep 300"
   }
-  depends_on = [ aws_instance.primary_vsocket ]
+  depends_on = [aws_instance.primary_vsocket]
 }
 
 #################################################################################
@@ -490,27 +488,24 @@ resource "null_resource" "configure_secondary_aws_vsocket" {
   }
 }
 
-# Retrieve Secondary vSocket Virtual Machine serial
-data "cato_accountSnapshotSite" "aws-site-secondary" {
-  depends_on = [ null_resource.configure_secondary_aws_vsocket ]
-  id = cato_socket_site.aws-site.id
-}
-
-locals {
-  primary_serial = [for s in data.cato_accountSnapshotSite.aws-site.info.sockets : s.serial if s.is_primary == true]
-}
-
 # Sleep to allow Secondary vSocket serial retrieval
 resource "null_resource" "sleep_30_seconds" {
   provisioner "local-exec" {
     command = "sleep 30"
   }
-  depends_on = [ data.cato_accountSnapshotSite.aws-site-secondary ]
+  depends_on = [null_resource.configure_secondary_aws_vsocket]
+}
+
+# Retrieve Secondary vSocket Virtual Machine serial
+data "cato_accountSnapshotSite" "aws-site-secondary" {
+  depends_on = [null_resource.sleep_30_seconds]
+  id         = cato_socket_site.aws-site.id
 }
 
 locals {
+  primary_serial   = [for s in data.cato_accountSnapshotSite.aws-site.info.sockets : s.serial if s.is_primary == true]
   secondary_serial = [for s in data.cato_accountSnapshotSite.aws-site-secondary.info.sockets : s.serial if s.is_primary == false]
-  depends_on = [null_resource.configure_secondary_aws_vsocket]
+  depends_on       = [null_resource.configure_secondary_aws_vsocket]
 }
 
 ## vSocket Instance
@@ -553,12 +548,12 @@ resource "null_resource" "sleep_300_seconds-HA" {
   provisioner "local-exec" {
     command = "sleep 300"
   }
-  depends_on = [ aws_instance.vsocket_secondary ]
+  depends_on = [aws_instance.vsocket_secondary]
 }
 
 data "cato_accountSnapshotSite" "aws-site-2" {
-  id = cato_socket_site.aws-site.id
-  depends_on = [ null_resource.sleep_300_seconds-HA ]
+  id         = cato_socket_site.aws-site.id
+  depends_on = [null_resource.sleep_300_seconds-HA]
 }
 
 ########## End Cato Site and Vsocket Deployment Resources ##########
