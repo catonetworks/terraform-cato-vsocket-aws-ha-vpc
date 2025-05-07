@@ -29,4 +29,6 @@ output "aws_availability_zones_out" { value = data.aws_availability_zones.availa
 output "aws_instance_id" { value = aws_instance.primary_vsocket.id }
 # output "cato_account_snapshot_site_secondary_id" { value = module.vsocket-aws-ha.cato_account_snapshot_site_secondary_id }
 output "aws_instance_vSocket_Secondary_id" { value = aws_instance.vsocket_secondary.id }
+output "internet_gateway_id" { value = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id }
+output "vpc_id" { value = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id }
 

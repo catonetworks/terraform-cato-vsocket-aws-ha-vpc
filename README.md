@@ -2,7 +2,7 @@
 
 Terraform module which deploys into an new or existing VPC and Internet Gateway, creates the required subnets, network interfaces, security groups, route tables, an AWS Socket HA Site in the Cato Management Application (CMA), and deploys a primary and secondary virtual socket VM instance in AWS and configures them as HA.
 
-For the vpc_id and internetGateway leave null to create new or add an id of the already created resources to use existing.
+For the vpc_id and internet_gateway_id leave null to create new or add an id of the already created resources to use existing.
 
 <details>
 <summary>Example AWS VPC and Internet Gateway Resources</summary>
@@ -78,7 +78,7 @@ module "vsocket-aws-ha" {
   site_description           = "Your Cato site Description here"
   site_type                  = "CLOUD_DC"
   vpc_id                     = null
-  internetGateway            = null 
+  internet_gateway           = null 
   vpc_range                  = "10.132.0.0/18"
   subnet_range_mgmt          = "10.132.1.0/24"
   subnet_range_wan           = "10.132.2.0/24"
@@ -247,6 +247,7 @@ No modules.
 | <a name="output_aws_iam_role_name"></a> [aws\_iam\_role\_name](#output\_aws\_iam\_role\_name) | output "socket\_site\_id" { value = cato\_accountShanpshotSite.aws-site.id } output "socket\_site\_serial" { value = module.vsocket-aws-ha.socket\_site\_serial } output "secondary\_socket\_site\_serial" { value = module.vsocket-aws-ha.secondary\_socket\_site\_serial } |
 | <a name="output_aws_instance_id"></a> [aws\_instance\_id](#output\_aws\_instance\_id) | n/a |
 | <a name="output_aws_instance_vSocket_Secondary_id"></a> [aws\_instance\_vSocket\_Secondary\_id](#output\_aws\_instance\_vSocket\_Secondary\_id) | output "cato\_account\_snapshot\_site\_secondary\_id" { value = module.vsocket-aws-ha.cato\_account\_snapshot\_site\_secondary\_id } |
+| <a name="output_internet_gateway_id"></a> [internet\_gateway\_id](#output\_internet\_gateway\_id) | n/a |
 | <a name="output_lan_eni_primary_id"></a> [lan\_eni\_primary\_id](#output\_lan\_eni\_primary\_id) | n/a |
 | <a name="output_lan_eni_secondary_id"></a> [lan\_eni\_secondary\_id](#output\_lan\_eni\_secondary\_id) | n/a |
 | <a name="output_lan_route_table_id"></a> [lan\_route\_table\_id](#output\_lan\_route\_table\_id) | n/a |
@@ -261,6 +262,7 @@ No modules.
 | <a name="output_sg_external_mgmt"></a> [sg\_external\_mgmt](#output\_sg\_external\_mgmt) | n/a |
 | <a name="output_sg_external_wan"></a> [sg\_external\_wan](#output\_sg\_external\_wan) | n/a |
 | <a name="output_sg_internal"></a> [sg\_internal](#output\_sg\_internal) | # The following attributes are exported: |
+| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | n/a |
 | <a name="output_wan_eni_primary_id"></a> [wan\_eni\_primary\_id](#output\_wan\_eni\_primary\_id) | n/a |
 | <a name="output_wan_eni_secondary_id"></a> [wan\_eni\_secondary\_id](#output\_wan\_eni\_secondary\_id) | n/a |
 | <a name="output_wan_route_table_id"></a> [wan\_route\_table\_id](#output\_wan\_route\_table\_id) | n/a |
