@@ -11,3 +11,8 @@
 ## 0.0.5 (2025-05-07)
 - Added sleep null resources between primary socket creation and siteAddSecondaryAzureVSocket API to ensure enough time for socket to finish provisioning and upgrading.
 - Added outputs for vpc_id and internet_gateway_id
+
+## 0.0.6 (2024-05-07)
+
+### Features
+- Added optional license resource and inputs used for commercial site deployments

@@ -2,7 +2,11 @@
 
 Terraform module which deploys into an new or existing VPC and Internet Gateway, creates the required subnets, network interfaces, security groups, route tables, an AWS Socket HA Site in the Cato Management Application (CMA), and deploys a primary and secondary virtual socket VM instance in AWS and configures them as HA.
 
-For the vpc_id and internet_gateway_id leave null to create new or add an id of the already created resources to use existing.
+For the vpc_id and internet_gateway_id, leave null to create new or add an id of the already created resources to use existing.
+
+## NOTE
+- For help with finding exact sytax to match site location for city, state_name, country_name and timezone, please refer to the [cato_siteLocation data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation).
+- For help with finding a license id to assign, please refer to the [cato_licensingInfo data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/licensingInfo).
 
 <details>
 <summary>Example AWS VPC and Internet Gateway Resources</summary>
@@ -29,12 +33,11 @@ terraform apply -target=aws_vpc.cato-vpc -target=aws_internet_gateway.internet_g
 
 Reference the resources as input variables with the following syntax:
 ```hcl
-  vpc_id           = aws_vpc.cato-vpc.id
-  internetGateway  = aws_internet_gateway.internet_gateway.id 
+  vpc_id               = aws_vpc.cato-vpc.id
+  internet_gateway_id  = aws_internet_gateway.internet_gateway.id 
 ```
 
 </details>
-
 
 ## Usage
 
@@ -49,25 +52,6 @@ provider "aws" {
   region = var.region
 }
 
-// Use data source to look up site_location 
-data "cato_siteLocation" "ny" {
-  filters = [{
-    field     = "city"
-    search    = "New York"
-    operation = "startsWith"
-    },
-    {
-      field     = "state_name"
-      search    = "New York"
-      operation = "exact"
-    },
-    {
-      field     = "country_name"
-      search    = "United"
-      operation = "contains"
-  }]
-}
-
 module "vsocket-aws-ha" {
   source                     = "catonetworks/vsocket-aws-ha-vpc/cato"
   token                      = var.token
@@ -78,7 +62,7 @@ module "vsocket-aws-ha" {
   site_description           = "Your Cato site Description here"
   site_type                  = "CLOUD_DC"
   vpc_id                     = null
-  internet_gateway           = null 
+  internet_gateway_id        = null 
   vpc_range                  = "10.132.0.0/18"
   subnet_range_mgmt          = "10.132.1.0/24"
   subnet_range_wan           = "10.132.2.0/24"
@@ -192,6 +176,7 @@ No modules.
 | [aws_subnet.mgmt_subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.wan_subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.cato-vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
+| [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
 | [cato_socket_site.aws-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
 | [null_resource.configure_secondary_aws_vsocket](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.sleep_300_seconds](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
@@ -220,6 +205,8 @@ No modules.
 | <a name="input_lan_eni_primary_ip"></a> [lan\_eni\_primary\_ip](#input\_lan\_eni\_primary\_ip) | Choose an IP Address within the LAN Subnet for the Primary lan interface. You CANNOT use the first four assignable IP addresses within the subnet as it's reserved for the AWS virtual router interface. The accepted input format is X.X.X.X | `string` | n/a | yes |
 | <a name="input_lan_eni_secondary_ip"></a> [lan\_eni\_secondary\_ip](#input\_lan\_eni\_secondary\_ip) | Choose an IP Address within the LAN Subnet for the Secondary lan interface. You CANNOT use the first four assignable IP addresses within the subnet as it's reserved for the AWS virtual router interface. The accepted input format is X.X.X.X | `string` | n/a | yes |
 | <a name="input_lan_ingress_cidr_blocks"></a> [lan\_ingress\_cidr\_blocks](#input\_lan\_ingress\_cidr\_blocks) | Set CIDR to receive traffic from the specified IPv4 CIDR address ranges<br/>	For example x.x.x.x/32 to allow one specific IP address access, 0.0.0.0/0 to allow all IP addresses access, or another CIDR range<br/>    Best practice is to allow a few IPs as possible<br/>    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X | `list(any)` | n/a | yes |
+| <a name="input_license_bw"></a> [license\_bw](#input\_license\_bw) | The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10. | `string` | `null` | no |
+| <a name="input_license_id"></a> [license\_id](#input\_license\_id) | The license ID for the Cato vSocket of license type CATO\_SITE, CATO\_SSE\_SITE, CATO\_PB, CATO\_PB\_SSE.  Example License ID value: 'abcde123-abcd-1234-abcd-abcde1234567'.  Note that licenses are for commercial accounts, and not supported for trial accounts. | `string` | `null` | no |
 | <a name="input_mgmt_eni_primary_ip"></a> [mgmt\_eni\_primary\_ip](#input\_mgmt\_eni\_primary\_ip) | Choose an IP Address within the Management Subnet. You CANNOT use the first four assignable IP addresses within the subnet as it's reserved for the AWS virtual router interface. The accepted input format is X.X.X.X | `string` | n/a | yes |
 | <a name="input_mgmt_eni_secondary_ip"></a> [mgmt\_eni\_secondary\_ip](#input\_mgmt\_eni\_secondary\_ip) | Choose an IP Address within the Management Subnet. You CANNOT use the first four assignable IP addresses within the subnet as it's reserved for the AWS virtual router interface. The accepted input format is X.X.X.X | `string` | n/a | yes |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | Description of the vsocket site | `string` | n/a | yes |
@@ -247,6 +234,7 @@ No modules.
 | <a name="output_aws_iam_role_name"></a> [aws\_iam\_role\_name](#output\_aws\_iam\_role\_name) | output "socket\_site\_id" { value = cato\_accountShanpshotSite.aws-site.id } output "socket\_site\_serial" { value = module.vsocket-aws-ha.socket\_site\_serial } output "secondary\_socket\_site\_serial" { value = module.vsocket-aws-ha.secondary\_socket\_site\_serial } |
 | <a name="output_aws_instance_id"></a> [aws\_instance\_id](#output\_aws\_instance\_id) | n/a |
 | <a name="output_aws_instance_vSocket_Secondary_id"></a> [aws\_instance\_vSocket\_Secondary\_id](#output\_aws\_instance\_vSocket\_Secondary\_id) | output "cato\_account\_snapshot\_site\_secondary\_id" { value = module.vsocket-aws-ha.cato\_account\_snapshot\_site\_secondary\_id } |
+| <a name="output_cato_license_site"></a> [cato\_license\_site](#output\_cato\_license\_site) | n/a |
 | <a name="output_internet_gateway_id"></a> [internet\_gateway\_id](#output\_internet\_gateway\_id) | n/a |
 | <a name="output_lan_eni_primary_id"></a> [lan\_eni\_primary\_id](#output\_lan\_eni\_primary\_id) | n/a |
 | <a name="output_lan_eni_secondary_id"></a> [lan\_eni\_secondary\_id](#output\_lan\_eni\_secondary\_id) | n/a |

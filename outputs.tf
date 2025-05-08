@@ -31,4 +31,11 @@ output "aws_instance_id" { value = aws_instance.primary_vsocket.id }
 output "aws_instance_vSocket_Secondary_id" { value = aws_instance.vsocket_secondary.id }
 output "internet_gateway_id" { value = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id }
 output "vpc_id" { value = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id }
-
+output "cato_license_site" {
+  value = var.license_id == null ? null : {
+    id           = cato_license.license[0].id
+    license_id   = cato_license.license[0].license_id
+    license_info = cato_license.license[0].license_info
+    site_id      = cato_license.license[0].site_id
+  }
+}

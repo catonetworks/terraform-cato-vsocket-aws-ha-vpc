@@ -556,5 +556,13 @@ data "cato_accountSnapshotSite" "aws-site-2" {
   depends_on = [null_resource.sleep_300_seconds-HA]
 }
 
+resource "cato_license" "license" {
+  depends_on = [aws_instance.vsocket_secondary]
+  count      = var.license_id == null ? 0 : 1
+  site_id    = cato_socket_site.aws-site.id
+  license_id = var.license_id
+  bw         = var.license_bw == null ? null : var.license_bw
+}
+
 ########## End Cato Site and Vsocket Deployment Resources ##########
 
