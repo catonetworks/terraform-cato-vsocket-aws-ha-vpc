@@ -19,16 +19,12 @@ output "lan_subnet_secondary_id" { value = aws_subnet.lan_subnet_secondary.id }
 output "mgmt_route_table_id" { value = aws_route_table.mgmtrt.id }
 output "wan_route_table_id" { value = aws_route_table.wanrt.id }
 output "lan_route_table_id" { value = aws_route_table.lanrt.id }
-# output "socket_site_id" { value = cato_accountShanpshotSite.aws-site.id }
-# output "socket_site_serial" { value = module.vsocket-aws-ha.socket_site_serial }
-# output "secondary_socket_site_serial" { value = module.vsocket-aws-ha.secondary_socket_site_serial }
 output "aws_iam_role_name" { value = aws_iam_role.cato_ha_role.name }
 output "aws_iam_policy_arn" { value = aws_iam_policy.cato_ha_policy.name }
 output "aws_iam_instance_profile_name" { value = aws_iam_instance_profile.cato_ha_instance_profile.name }
 output "aws_availability_zones_out" { value = data.aws_availability_zones.available }
-output "aws_instance_id" { value = aws_instance.primary_vsocket.id }
-# output "cato_account_snapshot_site_secondary_id" { value = module.vsocket-aws-ha.cato_account_snapshot_site_secondary_id }
-output "aws_instance_vSocket_Secondary_id" { value = aws_instance.vsocket_secondary.id }
+output "aws_instance_primary_vsocket_id" { value = aws_instance.primary_vsocket.id }
+output "aws_instance_secondary_vsocket_id" { value = aws_instance.secondary_vsocket.id }
 output "internet_gateway_id" { value = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id }
 output "vpc_id" { value = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id }
 output "cato_license_site" {

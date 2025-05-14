@@ -349,11 +349,12 @@ resource "cato_socket_site" "aws-site" {
   site_type     = var.site_type
 }
 
-data "cato_accountSnapshotSite" "aws-site" {
+data "cato_accountSnapshotSite" "aws-site-primary" {
   id = cato_socket_site.aws-site.id
 }
 
 locals {
+  primary_serial = [for s in data.cato_accountSnapshotSite.aws-site-primary.info.sockets : s.serial if s.is_primary == true]
   sanitized_name = replace(replace(replace(replace(replace(replace(
     var.site_name,
     "/", ""),
@@ -361,7 +362,7 @@ locals {
     "#", ""),
     "(", ""),
     ")", ""),
-    " ", "-")
+  " ", "-")
 }
 
 # AWS HA IAM role configuration
@@ -404,7 +405,7 @@ resource "aws_iam_role_policy_attachment" "cato_ha_attach" {
 }
 
 resource "aws_iam_instance_profile" "cato_ha_instance_profile" {
-  name = "Cato-HA-Role"
+  name = "Cato-HA-Role-${local.sanitized_name}"
   role = aws_iam_role.cato_ha_role.name
 }
 
@@ -514,13 +515,12 @@ data "cato_accountSnapshotSite" "aws-site-secondary" {
 }
 
 locals {
-  primary_serial   = [for s in data.cato_accountSnapshotSite.aws-site.info.sockets : s.serial if s.is_primary == true]
   secondary_serial = [for s in data.cato_accountSnapshotSite.aws-site-secondary.info.sockets : s.serial if s.is_primary == false]
-  depends_on       = [null_resource.configure_secondary_aws_vsocket]
+  depends_on       = [data.cato_accountSnapshotSite.aws-site-secondary]
 }
 
 ## vSocket Instance
-resource "aws_instance" "vsocket_secondary" {
+resource "aws_instance" "secondary_vsocket" {
   tenancy              = "default"
   ami                  = data.aws_ami.vsocket.id
   key_name             = var.key_pair
@@ -559,7 +559,7 @@ resource "null_resource" "sleep_300_seconds-HA" {
   provisioner "local-exec" {
     command = "sleep 300"
   }
-  depends_on = [aws_instance.vsocket_secondary]
+  depends_on = [aws_instance.secondary_vsocket]
 }
 
 data "cato_accountSnapshotSite" "aws-site-2" {
@@ -568,7 +568,7 @@ data "cato_accountSnapshotSite" "aws-site-2" {
 }
 
 resource "cato_license" "license" {
-  depends_on = [aws_instance.vsocket_secondary]
+  depends_on = [aws_instance.secondary_vsocket]
   count      = var.license_id == null ? 0 : 1
   site_id    = cato_socket_site.aws-site.id
   license_id = var.license_id

@@ -93,6 +93,26 @@ output "vsocket-ha-output" {
 }
 ```
 
+## Imporant note for troubleshooting
+
+In the event the module fails with the following error, this is an indication that the primary socket instance took longer than 5 minutes to upgrade and initialize.  
+
+```
+outputs.tf line X, in output "secondary_socket_site_serial":
+│    X: output "secondary_socket_site_serial" { value = data.cato_accountSnapshotSite.aws-site-secondary.info.sockets[1].serial }
+│     ├────────────────
+│     │ data.cato_accountSnapshotSite.aws-site-secondary.info.sockets is list of object with 1 element
+```
+
+We need to rerun the process to add the secondary socket. To resolve this, simply taint the `null_resource.configure_secondary_aws_vsocket` resource and re-run terraform apply.  
+Example:
+
+```
+terraform state list
+terraform taint null_resource.configure_secondary_aws_vsocket
+terraform apply
+```
+
 ## Site Location Reference
 
 For more information on site_location syntax, use the [Cato CLI](https://github.com/catonetworks/cato-cli) to lookup values.
@@ -150,7 +170,7 @@ No modules.
 | [aws_iam_role.cato_ha_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.cato_ha_attach](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_instance.primary_vsocket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
-| [aws_instance.vsocket_secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
+| [aws_instance.secondary_vsocket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
 | [aws_internet_gateway.internet_gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
 | [aws_network_interface.laneni_primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_interface) | resource |
 | [aws_network_interface.laneni_secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_interface) | resource |
@@ -185,8 +205,8 @@ No modules.
 | [aws_ami.vsocket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [aws_availability_zones.available_zones](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
-| [cato_accountSnapshotSite.aws-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 | [cato_accountSnapshotSite.aws-site-2](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_accountSnapshotSite.aws-site-primary](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 | [cato_accountSnapshotSite.aws-site-secondary](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 
 ## Inputs
@@ -231,9 +251,9 @@ No modules.
 | <a name="output_aws_availability_zones_out"></a> [aws\_availability\_zones\_out](#output\_aws\_availability\_zones\_out) | n/a |
 | <a name="output_aws_iam_instance_profile_name"></a> [aws\_iam\_instance\_profile\_name](#output\_aws\_iam\_instance\_profile\_name) | n/a |
 | <a name="output_aws_iam_policy_arn"></a> [aws\_iam\_policy\_arn](#output\_aws\_iam\_policy\_arn) | n/a |
-| <a name="output_aws_iam_role_name"></a> [aws\_iam\_role\_name](#output\_aws\_iam\_role\_name) | output "socket\_site\_id" { value = cato\_accountShanpshotSite.aws-site.id } output "socket\_site\_serial" { value = module.vsocket-aws-ha.socket\_site\_serial } output "secondary\_socket\_site\_serial" { value = module.vsocket-aws-ha.secondary\_socket\_site\_serial } |
-| <a name="output_aws_instance_id"></a> [aws\_instance\_id](#output\_aws\_instance\_id) | n/a |
-| <a name="output_aws_instance_vSocket_Secondary_id"></a> [aws\_instance\_vSocket\_Secondary\_id](#output\_aws\_instance\_vSocket\_Secondary\_id) | output "cato\_account\_snapshot\_site\_secondary\_id" { value = module.vsocket-aws-ha.cato\_account\_snapshot\_site\_secondary\_id } |
+| <a name="output_aws_iam_role_name"></a> [aws\_iam\_role\_name](#output\_aws\_iam\_role\_name) | n/a |
+| <a name="output_aws_instance_primary_vsocket_id"></a> [aws\_instance\_primary\_vsocket\_id](#output\_aws\_instance\_primary\_vsocket\_id) | n/a |
+| <a name="output_aws_instance_secondary_vsocket_id"></a> [aws\_instance\_secondary\_vsocket\_id](#output\_aws\_instance\_secondary\_vsocket\_id) | n/a |
 | <a name="output_cato_license_site"></a> [cato\_license\_site](#output\_cato\_license\_site) | n/a |
 | <a name="output_internet_gateway_id"></a> [internet\_gateway\_id](#output\_internet\_gateway\_id) | n/a |
 | <a name="output_lan_eni_primary_id"></a> [lan\_eni\_primary\_id](#output\_lan\_eni\_primary\_id) | n/a |

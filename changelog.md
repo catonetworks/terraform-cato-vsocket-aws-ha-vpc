@@ -17,7 +17,9 @@
 ### Features
 - Added optional license resource and inputs used for commercial site deployments
 
-## 0.0.7 (2024-05-13)
+## 0.0.8 (2024-05-13)
 
 ### Features
 - Updating iam role name creation to be unique with site name, filtering out invalid characters
+- Renamed resources and outputs to align with standard
+
