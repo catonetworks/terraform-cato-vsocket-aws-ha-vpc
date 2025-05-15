@@ -21,14 +21,14 @@ variable "vpc_id" {
   default     = null
 }
 
-# variable "vpc_range" {
-#   type        = string
-#   description = <<EOT
-#   	Choose a unique range for your new VPC that does not conflict with the rest of your Wide Area Network.
-#     The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X
-# 	EOT
-#   default = null
-# }
+variable "vpc_range" {
+  type        = string
+  description = <<EOT
+  	Choose a unique range for your new VPC that does not conflict with the rest of your Wide Area Network.
+    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X
+	EOT
+  default     = null
+}
 
 variable "internet_gateway_id" {
   description = "Specify an Internet Gateway ID to use. If not specified, a new Internet Gateway will be created."
@@ -77,11 +77,17 @@ variable "site_location" {
 }
 
 ## VPC Module Variables
-variable "region" {
-  type = string
+variable "ingress_cidr_blocks" {
+  type        = list(any)
+  description = <<EOT
+  	Set CIDR to receive traffic from the specified IPv4 CIDR address ranges
+	For example x.x.x.x/32 to allow one specific IP address access, 0.0.0.0/0 to allow all IP addresses access, or another CIDR range
+    Best practice is to allow a few IPs as possible
+    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X
+	EOT  
 }
 
-variable "ingress_cidr_blocks" {
+variable "lan_ingress_cidr_blocks" {
   type        = list(any)
   description = <<EOT
   	Set CIDR to receive traffic from the specified IPv4 CIDR address ranges
@@ -171,4 +177,34 @@ variable "tags" {
   description = "Tags to be appended to AWS resources"
   type        = map(string)
   default     = {}
+}
+
+variable "connection_type" {
+  description = "Model of Cato vsocket"
+  type        = string
+  default     = "SOCKET_AWS1500"
+}
+
+variable "ebs_disk_size" {
+  description = "Size of disk"
+  type        = number
+  default     = 32
+}
+
+variable "ebs_disk_type" {
+  description = "Size of disk"
+  type        = string
+  default     = "gp2"
+}
+
+variable "license_id" {
+  description = "The license ID for the Cato vSocket of license type CATO_SITE, CATO_SSE_SITE, CATO_PB, CATO_PB_SSE.  Example License ID value: 'abcde123-abcd-1234-abcd-abcde1234567'.  Note that licenses are for commercial accounts, and not supported for trial accounts."
+  type        = string
+  default     = null
+}
+
+variable "license_bw" {
+  description = "The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10."
+  type        = string
+  default     = null
 }
