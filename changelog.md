@@ -23,7 +23,12 @@
 - Updating iam role name creation to be unique with site name, filtering out invalid characters
 - Renamed resources and outputs to align with standard
 
-## 0.0.9 (2024-05-13)
+## 0.0.9 (2024-05-15)
 
 ### Features
-- Fixed typp in readme
+- Fixed typo in readme
+
+## 0.0.10 (2024-05-15)
+
+### Features
+- Reduced routes to only have WAN and LAN routes 

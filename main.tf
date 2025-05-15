@@ -300,22 +300,16 @@ resource "aws_route" "wan_route" {
   gateway_id             = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id
 }
 
-resource "aws_route" "mgmt_route" {
-  route_table_id         = aws_route_table.mgmtrt.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id
-}
-
 resource "aws_route" "lan_route" {
   route_table_id         = aws_route_table.lanrt.id
   destination_cidr_block = "0.0.0.0/0"
-  network_interface_id   = aws_network_interface.laneni_primary.id
+  network_interface_id   = aws_network_interface.laneni.id
 }
 
 # Route Table Associations
 resource "aws_route_table_association" "mgmt_subnet_route_table_association" {
   subnet_id      = aws_subnet.mgmt_subnet.id
-  route_table_id = aws_route_table.mgmtrt.id
+  route_table_id = aws_route_table.wanrt.id
 }
 
 resource "aws_route_table_association" "wan_subnet_route_table_association" {
