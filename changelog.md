@@ -23,3 +23,7 @@
 - Updating iam role name creation to be unique with site name, filtering out invalid characters
 - Renamed resources and outputs to align with standard
 
+## 0.0.9 (2024-05-13)
+
+### Features
+- Fixed typp in readme

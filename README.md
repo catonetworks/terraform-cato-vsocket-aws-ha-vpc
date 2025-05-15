@@ -52,7 +52,7 @@ provider "aws" {
   region = var.region
 }
 
-module "vsocket-aws-ha" {
+module "vsocket-aws-ha-vpc" {
   source                     = "catonetworks/vsocket-aws-ha-vpc/cato"
   token                      = var.token
   account_id                 = var.account_id
