@@ -28,7 +28,7 @@
 ### Features
 - Fixed typo in readme
 
-## 0.0.10 (2024-05-15)
+## 0.0.11 (2024-05-15)
 
 ### Features
 - Reduced routes to only have WAN and LAN routes 

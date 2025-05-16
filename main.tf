@@ -297,13 +297,19 @@ resource "aws_route_table" "lanrt" {
 resource "aws_route" "wan_route" {
   route_table_id         = aws_route_table.wanrt.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id
+  gateway_id             = var.internet_gateway_id != null ? var.internet_gateway_id : aws_internet_gateway.internet_gateway[0].id
+}
+
+resource "aws_route" "mgmt_route" {
+  route_table_id         = aws_route_table.mgmtrt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = var.internet_gateway_id != null ? var.internet_gateway_id : aws_internet_gateway.internet_gateway[0].id
 }
 
 resource "aws_route" "lan_route" {
   route_table_id         = aws_route_table.lanrt.id
   destination_cidr_block = "0.0.0.0/0"
-  network_interface_id   = aws_network_interface.laneni.id
+  network_interface_id   = aws_network_interface.laneni_primary.id
 }
 
 # Route Table Associations
