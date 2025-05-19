@@ -90,45 +90,55 @@ resource "aws_security_group" "internal_sg" {
       self             = false
     }
   ]
-  tags = {
-    name = "${var.site_name}-Internal-SG"
-  }
+  tags = merge(var.tags, {
+    name = "${var.site_name}-Cato-Internal-SG"
+  })
 }
 
-resource "aws_security_group" "external_sg_mgmt" {
+resource "aws_security_group" "external_sg" {
   name        = "${var.site_name}-External-SG-MGMT"
   description = "CATO MGMT Security Group - Allow HTTPS In"
   vpc_id      = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  ingress = [
+  ingress     = []
+  egress = [
     {
-      description      = "Allow HTTPS In"
+      description      = "Allow HTTPS Outbound"
       protocol         = "tcp"
       from_port        = 443
       to_port          = 443
-      cidr_blocks      = var.ingress_cidr_blocks
+      cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
       security_groups  = []
       self             = false
     },
     {
-      description      = "Allow SSH In"
+      description      = "Allow DTLS Outbound"
+      protocol         = "udp"
+      from_port        = 443
+      to_port          = 443
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    },
+    {
+      description      = "Allow DNS-UDP Outbound"
+      protocol         = "udp"
+      from_port        = 53
+      to_port          = 53
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    },
+    {
+      description      = "Allow DNS-TCP Outbound"
       protocol         = "tcp"
-      from_port        = 22
-      to_port          = 22
-      cidr_blocks      = var.ingress_cidr_blocks
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    }
-  ]
-  egress = [
-    {
-      description      = "Allow all traffic Outbound"
-      protocol         = -1
-      from_port        = 0
-      to_port          = 0
+      from_port        = 53
+      to_port          = 53
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
@@ -136,31 +146,9 @@ resource "aws_security_group" "external_sg_mgmt" {
       self             = false
     }
   ]
-  tags = {
-    name = "${var.site_name}-External-SG-MGMT"
-  }
-}
-
-resource "aws_security_group" "external_sg_wan" {
-  name        = "${var.site_name}-External-SG-WAN"
-  description = "CATO WAN Security Group - Allow all out, none in"
-  vpc_id      = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  egress = [
-    {
-      description      = "Allow all traffic Outbound"
-      protocol         = -1
-      from_port        = 0
-      to_port          = 0
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    }
-  ]
-  tags = {
-    name = "${var.site_name}-External-SG-WAN"
-  }
+  tags = merge(var.tags, {
+    name = "${var.site_name}-Cato-External-SG"
+  })
 }
 
 # vSocket Network Interfaces
@@ -168,40 +156,39 @@ resource "aws_network_interface" "mgmteni_primary" {
   source_dest_check = "true"
   subnet_id         = aws_subnet.mgmt_subnet.id
   private_ips       = [var.mgmt_eni_primary_ip]
-  security_groups   = [aws_security_group.external_sg_mgmt.id]
-  tags = {
-    Name = "${var.site_name}-MGMT-INT-Primary"
-  }
+  security_groups   = [aws_security_group.external_sg.id]
+  tags = merge(var.tags, {
+  Name = "${var.site_name}-MGMT-INT-Primary" })
 }
 
 resource "aws_network_interface" "mgmteni_secondary" {
   source_dest_check = "true"
   subnet_id         = aws_subnet.mgmt_subnet.id
   private_ips       = [var.mgmt_eni_secondary_ip]
-  security_groups   = [aws_security_group.external_sg_mgmt.id]
-  tags = {
+  security_groups   = [aws_security_group.external_sg.id]
+  tags = merge(var.tags, {
     Name = "${var.site_name}-MGMT-INT-Secondary"
-  }
+  })
 }
 
 resource "aws_network_interface" "waneni_primary" {
   source_dest_check = "true"
   subnet_id         = aws_subnet.wan_subnet.id
   private_ips       = [var.wan_eni_primary_ip]
-  security_groups   = [aws_security_group.external_sg_wan.id]
-  tags = {
+  security_groups   = [aws_security_group.external_sg.id]
+  tags = merge(var.tags, {
     Name = "${var.site_name}-WAN-INT-Primary"
-  }
+  })
 }
 
 resource "aws_network_interface" "waneni_secondary" {
   source_dest_check = "true"
   subnet_id         = aws_subnet.wan_subnet.id
   private_ips       = [var.wan_eni_secondary_ip]
-  security_groups   = [aws_security_group.external_sg_wan.id]
-  tags = {
+  security_groups   = [aws_security_group.external_sg.id]
+  tags = merge(var.tags, {
     Name = "${var.site_name}-WAN-INT-Secondary"
-  }
+  })
 }
 
 
@@ -210,9 +197,9 @@ resource "aws_network_interface" "laneni_primary" {
   subnet_id         = aws_subnet.lan_subnet_primary.id
   private_ips       = [var.lan_eni_primary_ip]
   security_groups   = [aws_security_group.internal_sg.id]
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-LAN-INT-Primary"
-  }
+  })
 }
 
 resource "aws_network_interface" "laneni_secondary" {
@@ -220,34 +207,34 @@ resource "aws_network_interface" "laneni_secondary" {
   subnet_id         = aws_subnet.lan_subnet_secondary.id
   private_ips       = [var.lan_eni_secondary_ip]
   security_groups   = [aws_security_group.internal_sg.id]
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-LAN-INT-Secondary"
-  }
+  })
 }
 
 # Elastic IP Addresses
 resource "aws_eip" "waneip_primary" {
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-WAN-EIP-Primary"
-  }
+  })
 }
 
 resource "aws_eip" "waneip_secondary" {
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-WAN-EIP-Secondary"
-  }
+  })
 }
 
 resource "aws_eip" "mgmteip_primary" {
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-MGMT-EIP-Primary"
-  }
+  })
 }
 
 resource "aws_eip" "mgmteip_secondary" {
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-MGMT-EIP-Secondary"
-  }
+  })
 }
 
 # Elastic IP Addresses Association - Required to properly destroy 
@@ -274,34 +261,21 @@ resource "aws_eip_association" "mgmteip_assoc_secondary" {
 # Routing Tables
 resource "aws_route_table" "wanrt" {
   vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-WAN-RT"
-  }
-}
-
-resource "aws_route_table" "mgmtrt" {
-  vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  tags = {
-    Name = "${var.site_name}-MGMT-RT"
-  }
+  })
 }
 
 resource "aws_route_table" "lanrt" {
   vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-LAN-RT"
-  }
+  })
 }
 
 # Routes
 resource "aws_route" "wan_route" {
   route_table_id         = aws_route_table.wanrt.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id
-}
-
-resource "aws_route" "mgmt_route" {
-  route_table_id         = aws_route_table.mgmtrt.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = var.internet_gateway_id == null ? aws_internet_gateway.internet_gateway[0].id : var.internet_gateway_id
 }
@@ -315,7 +289,7 @@ resource "aws_route" "lan_route" {
 # Route Table Associations
 resource "aws_route_table_association" "mgmt_subnet_route_table_association" {
   subnet_id      = aws_subnet.mgmt_subnet.id
-  route_table_id = aws_route_table.mgmtrt.id
+  route_table_id = aws_route_table.wanrt.id
 }
 
 resource "aws_route_table_association" "wan_subnet_route_table_association" {

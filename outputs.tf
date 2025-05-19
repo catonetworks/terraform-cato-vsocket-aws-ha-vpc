@@ -1,7 +1,6 @@
 ## The following attributes are exported:
 output "sg_internal" { value = aws_security_group.internal_sg.id }
-output "sg_external_mgmt" { value = aws_security_group.external_sg_mgmt }
-output "sg_external_wan" { value = aws_security_group.external_sg_wan }
+output "sg_external" { value = aws_security_group.external_sg }
 output "mgmt_eni_primary_id" { value = aws_network_interface.mgmteni_primary.id }
 output "wan_eni_primary_id" { value = aws_network_interface.waneni_primary.id }
 output "lan_eni_primary_id" { value = aws_network_interface.laneni_primary.id }
@@ -16,7 +15,6 @@ output "mgmt_subnet_id" { value = aws_subnet.mgmt_subnet.id }
 output "wan_subnet_id" { value = aws_subnet.wan_subnet.id }
 output "lan_subnet_primary_id" { value = aws_subnet.lan_subnet_primary.id }
 output "lan_subnet_secondary_id" { value = aws_subnet.lan_subnet_secondary.id }
-output "mgmt_route_table_id" { value = aws_route_table.mgmtrt.id }
 output "wan_route_table_id" { value = aws_route_table.wanrt.id }
 output "lan_route_table_id" { value = aws_route_table.lanrt.id }
 output "aws_iam_role_name" { value = aws_iam_role.cato_ha_role.name }
