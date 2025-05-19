@@ -3,17 +3,17 @@
 resource "aws_vpc" "cato-vpc" {
   count      = var.vpc_id == null ? 1 : 0
   cidr_block = var.vpc_range
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-VPC"
-  }
+  })
 }
 
 # Internet Gateway
 resource "aws_internet_gateway" "internet_gateway" {
   count = var.internet_gateway_id == null ? 1 : 0
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-IGW"
-  }
+  })
   vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
 }
 
@@ -27,36 +27,36 @@ resource "aws_subnet" "mgmt_subnet" {
   vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_mgmt
   availability_zone = data.aws_availability_zones.available.names[0]
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-MGMT-Subnet"
-  }
+  })
 }
 
 resource "aws_subnet" "wan_subnet" {
   vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_wan
   availability_zone = data.aws_availability_zones.available.names[0]
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-WAN-Subnet"
-  }
+  })
 }
 
 resource "aws_subnet" "lan_subnet_primary" {
   vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_lan_primary
   availability_zone = data.aws_availability_zones.available.names[0]
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-LAN-Subnet-Primary"
-  }
+  })
 }
 
 resource "aws_subnet" "lan_subnet_secondary" {
   vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_lan_secondary
   availability_zone = data.aws_availability_zones.available.names[0]
-  tags = {
+  tags = merge(var.tags, {
     Name = "${var.site_name}-LAN-Subnet-Secondary"
-  }
+  })
 }
 
 # Internal and External Security Groups
@@ -353,6 +353,9 @@ resource "aws_iam_role" "cato_ha_role" {
       }
     }]
   })
+  tags = merge(var.tags, {
+    Name = "Cato-HA-Role-${local.sanitized_name}"
+  })
 }
 
 resource "aws_iam_policy" "cato_ha_policy" {
@@ -371,6 +374,9 @@ resource "aws_iam_policy" "cato_ha_policy" {
       },
     ]
   })
+  tags = merge(var.tags, {
+    Name = "Cato-HA-Role-Policy-${local.sanitized_name}"
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "cato_ha_attach" {
@@ -381,6 +387,9 @@ resource "aws_iam_role_policy_attachment" "cato_ha_attach" {
 resource "aws_iam_instance_profile" "cato_ha_instance_profile" {
   name = "Cato-HA-Role-${local.sanitized_name}"
   role = aws_iam_role.cato_ha_role.name
+  tags = merge(var.tags, {
+    Name = "Cato-HA-Role-${local.sanitized_name}"
+  })
 }
 
 ## Lookup data from region and VPC
