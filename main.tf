@@ -23,19 +23,37 @@ data "aws_availability_zones" "available_zones" {
 }
 
 # Subnets
-resource "aws_subnet" "mgmt_subnet" {
+resource "aws_subnet" "mgmt_subnet_primary" {
   vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  cidr_block        = var.subnet_range_mgmt
+  cidr_block        = var.subnet_range_mgmt_primary
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = merge(var.tags, {
     Name = "${var.site_name}-MGMT-Subnet"
   })
 }
 
-resource "aws_subnet" "wan_subnet" {
+resource "aws_subnet" "mgmt_subnet_secondary" {
   vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  cidr_block        = var.subnet_range_wan
+  cidr_block        = var.subnet_range_mgmt_secondary
+  availability_zone = data.aws_availability_zones.available.names[1]
+  tags = merge(var.tags, {
+    Name = "${var.site_name}-MGMT-Subnet"
+  })
+}
+
+resource "aws_subnet" "wan_subnet_primary" {
+  vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  cidr_block        = var.subnet_range_wan_primary
   availability_zone = data.aws_availability_zones.available.names[0]
+  tags = merge(var.tags, {
+    Name = "${var.site_name}-WAN-Subnet"
+  })
+}
+
+resource "aws_subnet" "wan_subnet_secondary" {
+  vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
+  cidr_block        = var.subnet_range_wan_secondary
+  availability_zone = data.aws_availability_zones.available.names[1]
   tags = merge(var.tags, {
     Name = "${var.site_name}-WAN-Subnet"
   })
@@ -53,7 +71,7 @@ resource "aws_subnet" "lan_subnet_primary" {
 resource "aws_subnet" "lan_subnet_secondary" {
   vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
   cidr_block        = var.subnet_range_lan_secondary
-  availability_zone = data.aws_availability_zones.available.names[0]
+  availability_zone = data.aws_availability_zones.available.names[1]
   tags = merge(var.tags, {
     Name = "${var.site_name}-LAN-Subnet-Secondary"
   })
@@ -154,7 +172,7 @@ resource "aws_security_group" "external_sg" {
 # vSocket Network Interfaces
 resource "aws_network_interface" "mgmteni_primary" {
   source_dest_check = "true"
-  subnet_id         = aws_subnet.mgmt_subnet.id
+  subnet_id         = aws_subnet.mgmt_subnet_primary.id
   private_ips       = [var.mgmt_eni_primary_ip]
   security_groups   = [aws_security_group.external_sg.id]
   tags = merge(var.tags, {
@@ -163,7 +181,7 @@ resource "aws_network_interface" "mgmteni_primary" {
 
 resource "aws_network_interface" "mgmteni_secondary" {
   source_dest_check = "true"
-  subnet_id         = aws_subnet.mgmt_subnet.id
+  subnet_id         = aws_subnet.mgmt_subnet_secondary.id
   private_ips       = [var.mgmt_eni_secondary_ip]
   security_groups   = [aws_security_group.external_sg.id]
   tags = merge(var.tags, {
@@ -173,7 +191,7 @@ resource "aws_network_interface" "mgmteni_secondary" {
 
 resource "aws_network_interface" "waneni_primary" {
   source_dest_check = "true"
-  subnet_id         = aws_subnet.wan_subnet.id
+  subnet_id         = aws_subnet.wan_subnet_primary.id
   private_ips       = [var.wan_eni_primary_ip]
   security_groups   = [aws_security_group.external_sg.id]
   tags = merge(var.tags, {
@@ -183,7 +201,7 @@ resource "aws_network_interface" "waneni_primary" {
 
 resource "aws_network_interface" "waneni_secondary" {
   source_dest_check = "true"
-  subnet_id         = aws_subnet.wan_subnet.id
+  subnet_id         = aws_subnet.wan_subnet_secondary.id
   private_ips       = [var.wan_eni_secondary_ip]
   security_groups   = [aws_security_group.external_sg.id]
   tags = merge(var.tags, {
@@ -287,13 +305,23 @@ resource "aws_route" "lan_route" {
 }
 
 # Route Table Associations
-resource "aws_route_table_association" "mgmt_subnet_route_table_association" {
-  subnet_id      = aws_subnet.mgmt_subnet.id
+resource "aws_route_table_association" "mgmt_subnet_primary_route_table_association" {
+  subnet_id      = aws_subnet.mgmt_subnet_primary.id
   route_table_id = aws_route_table.wanrt.id
 }
 
-resource "aws_route_table_association" "wan_subnet_route_table_association" {
-  subnet_id      = aws_subnet.wan_subnet.id
+resource "aws_route_table_association" "mgmt_subnet_secondary_route_table_association" {
+  subnet_id      = aws_subnet.mgmt_subnet_secondary.id
+  route_table_id = aws_route_table.wanrt.id
+}
+
+resource "aws_route_table_association" "wan_subnet_primary_route_table_association" {
+  subnet_id      = aws_subnet.wan_subnet_primary.id
+  route_table_id = aws_route_table.wanrt.id
+}
+
+resource "aws_route_table_association" "wan_subnet_secondary_route_table_association" {
+  subnet_id      = aws_subnet.wan_subnet_secondary.id
   route_table_id = aws_route_table.wanrt.id
 }
 
@@ -316,7 +344,7 @@ resource "cato_socket_site" "aws-site" {
   description     = var.site_description
   name            = var.site_name
   native_range = {
-    native_network_range = var.subnet_range_lan_primary
+    native_network_range = var.native_network_range
     local_ip             = var.lan_eni_primary_ip
   }
   site_location = var.site_location

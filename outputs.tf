@@ -15,24 +15,24 @@ output "mgmt_eni_primary_id" {
   value       = aws_network_interface.mgmteni_primary.id
 }
 
-output "wan_eni_primary_id" {
-  description = "WAN ENI ID for outbound Internet connectivity on the first vSocket"
-  value       = aws_network_interface.waneni_primary.id
-}
-
-output "lan_eni_primary_id" {
-  description = "LAN ENI ID providing internal LAN access to the first vSocket"
-  value       = aws_network_interface.laneni_primary.id
-}
-
 output "mgmt_eni_secondary_id" {
   description = "Management ENI ID attached to the standby vSocket instance"
   value       = aws_network_interface.mgmteni_secondary.id
 }
 
+output "wan_eni_primary_id" {
+  description = "WAN ENI ID for outbound Internet connectivity on the first vSocket"
+  value       = aws_network_interface.waneni_primary.id
+}
+
 output "wan_eni_secondary_id" {
   description = "WAN ENI ID for outbound Internet connectivity on the standby vSocket"
   value       = aws_network_interface.waneni_secondary.id
+}
+
+output "lan_eni_primary_id" {
+  description = "LAN ENI ID providing internal LAN access to the first vSocket"
+  value       = aws_network_interface.laneni_primary.id
 }
 
 output "lan_eni_secondary_id" {
@@ -45,14 +45,14 @@ output "mgmteip_primary" {
   value       = aws_eip.mgmteip_primary.public_ip
 }
 
-output "waneip_primary" {
-  description = "Public IP address of the primary WAN Elastic IP"
-  value       = aws_eip.waneip_primary.public_ip
-}
-
 output "mgmteip_secondary" {
   description = "Public IP address of the secondary management Elastic IP"
   value       = aws_eip.mgmteip_secondary.public_ip
+}
+
+output "waneip_primary" {
+  description = "Public IP address of the primary WAN Elastic IP"
+  value       = aws_eip.waneip_primary.public_ip
 }
 
 output "waneip_secondary" {
@@ -60,14 +60,24 @@ output "waneip_secondary" {
   value       = aws_eip.waneip_secondary.public_ip
 }
 
-output "mgmt_subnet_id" {
+output "mgmt_subnet_primary_id" {
   description = "Subnet ID dedicated to management traffic for vSockets"
-  value       = aws_subnet.mgmt_subnet.id
+  value       = aws_subnet.mgmt_subnet_primary.id
 }
 
-output "wan_subnet_id" {
+output "mgmt_subnet_secondary_id" {
+  description = "Subnet ID dedicated to management traffic for vSockets"
+  value       = aws_subnet.mgmt_subnet_secondary.id
+}
+
+output "wan_subnet_primary_id" {
   description = "Subnet ID dedicated to WAN traffic for vSockets"
-  value       = aws_subnet.wan_subnet.id
+  value       = aws_subnet.wan_subnet_primary.id
+}
+
+output "wan_subnet_secondary_id" {
+  description = "Subnet ID dedicated to WAN traffic for vSockets"
+  value       = aws_subnet.wan_subnet_secondary.id
 }
 
 output "lan_subnet_primary_id" {
@@ -78,6 +88,16 @@ output "lan_subnet_primary_id" {
 output "lan_subnet_secondary_id" {
   description = "Secondary LAN subnet ID providing HA for internal traffic"
   value       = aws_subnet.lan_subnet_secondary.id
+}
+
+output "lan_subnet_primary_azid" {
+  description = "Primary LAN subnet ID serving internal applications"
+  value       = aws_subnet.lan_subnet_primary.availability_zone_id
+}
+
+output "lan_subnet_secondary_azid" {
+  description = "Secondary LAN subnet ID providing HA for internal traffic"
+  value       = aws_subnet.lan_subnet_secondary.availability_zone_id
 }
 
 output "wan_route_table_id" {
@@ -138,4 +158,8 @@ output "cato_license_site" {
     license_info = cato_license.license[0].license_info
     site_id      = cato_license.license[0].site_id
   }
+}
+
+output "lan_subnet_route_table_id" {
+  value = aws_route_table.lanrt.id
 }
