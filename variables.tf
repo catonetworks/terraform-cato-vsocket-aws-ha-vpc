@@ -62,6 +62,7 @@ variable "site_type" {
 }
 
 variable "site_location" {
+  description = "The Site Location Data"
   type = object({
     city         = string
     country_code = string

@@ -63,8 +63,8 @@ module "vsocket-aws-ha-vpc" {
   source                     = "catonetworks/vsocket-aws-ha-vpc/cato"
   token                      = var.token
   account_id                 = var.account_id
-  key_pair                   = "cato-eu-north-1"
-  region                     = "eu-north-1"
+  key_pair                   = "Your-AWS-KeyPair-Name-Here"
+  region                     = var.region
   site_name                  = "Your-Cato-site-name-here"
   site_description           = "Your Cato site Description here"
   site_type                  = "CLOUD_DC"
