@@ -28,7 +28,7 @@
 ### Features
 - Fixed typp in readme
 
-## 0.0.10 (2025-05-19)
+## 0.1.0 (2025-05-20)
 
 ### Features
  - Adjusted Security Groups to be in-line with ProServ recommendations.
