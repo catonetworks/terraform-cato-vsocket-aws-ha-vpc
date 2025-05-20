@@ -52,37 +52,39 @@ provider "aws" {
   region = var.region
 }
 
-variable token {}
-variable account_id {}
-variable baseurl {}
-variable region {
-    default = "us-west-2"
+variable "token" {}
+variable "account_id" {}
+variable "baseurl" {}
+variable "region" {
+  default = "us-west-2"
 }
 
 module "vsocket-aws-ha-vpc" {
-  source                     = "catonetworks/vsocket-aws-ha-vpc/cato"
-  token                      = var.token
-  account_id                 = var.account_id
-  key_pair                   = "Your-AWS-KeyPair-Name-Here"
-  region                     = var.region
-  site_name                  = "Your-Cato-site-name-here"
-  site_description           = "Your Cato site Description here"
-  site_type                  = "CLOUD_DC"
-  vpc_id                     = null
-  internet_gateway_id        = null 
-  vpc_range                  = "10.132.0.0/18"
-  subnet_range_mgmt          = "10.132.1.0/24"
-  subnet_range_wan           = "10.132.2.0/24"
-  subnet_range_lan_primary   = "10.132.3.0/24"
-  subnet_range_lan_secondary = "10.132.4.0/24"
-  mgmt_eni_primary_ip        = "10.132.1.5"
-  mgmt_eni_secondary_ip      = "10.132.1.6"
-  wan_eni_primary_ip         = "10.132.2.5"
-  wan_eni_secondary_ip       = "10.132.2.6"
-  lan_eni_primary_ip         = "10.132.3.5"
-  lan_eni_secondary_ip       = "10.132.4.5"
-  ingress_cidr_blocks        = ["0.0.0.0/0"]
-  lan_ingress_cidr_blocks    = ["0.0.0.0/0"]
+  source                      = "catonetworks/vsocket-aws-ha-vpc/cato"
+  token                       = var.token
+  account_id                  = var.account_id
+  key_pair                    = "Your-AWS-KeyPair-Name-Here"
+  site_name                   = "Your-Cato-site-name-here"
+  site_description            = "Your Cato site Description here"
+  site_type                   = "CLOUD_DC"
+  vpc_id                      = null
+  internet_gateway_id         = null
+  native_network_range        = "10.132.0.0/18"
+  vpc_range                   = "10.132.0.0/18"
+  subnet_range_mgmt_primary   = "10.132.1.0/24"
+  subnet_range_mgmt_secondary = "10.132.2.0/24"
+  subnet_range_wan_primary    = "10.132.3.0/24"
+  subnet_range_wan_secondary  = "10.132.4.0/24"
+  subnet_range_lan_primary    = "10.132.5.0/24"
+  subnet_range_lan_secondary  = "10.132.6.0/24"
+  mgmt_eni_primary_ip         = "10.132.1.5"
+  mgmt_eni_secondary_ip       = "10.132.2.6"
+  wan_eni_primary_ip          = "10.132.3.5"
+  wan_eni_secondary_ip        = "10.132.4.6"
+  lan_eni_primary_ip          = "10.132.5.5"
+  lan_eni_secondary_ip        = "10.132.6.5"
+  ingress_cidr_blocks         = ["0.0.0.0/0"]
+  lan_ingress_cidr_blocks     = ["0.0.0.0/0"]
   site_location = {
     city         = "London"
     country_code = "GB"
@@ -96,7 +98,7 @@ module "vsocket-aws-ha-vpc" {
 }
 
 output "vsocket-ha-output" {
-  value = module.vsocket-aws-ha
+  value = module.vsocket-aws-ha-vpc
 }
 ```
 

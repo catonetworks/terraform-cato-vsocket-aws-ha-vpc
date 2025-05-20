@@ -209,7 +209,6 @@ resource "aws_network_interface" "waneni_secondary" {
   })
 }
 
-
 resource "aws_network_interface" "laneni_primary" {
   source_dest_check = "false"
   subnet_id         = aws_subnet.lan_subnet_primary.id

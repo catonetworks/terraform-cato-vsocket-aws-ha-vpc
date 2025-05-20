@@ -55,4 +55,9 @@
       - subnet_range_wan_secondary
  - Updated ChangeLog
  - Updated Readme 
+
+ ## 0.1.1 (2025-05-20)
+
+ ### Features
+  - Updated README.md to fix errors 
  
