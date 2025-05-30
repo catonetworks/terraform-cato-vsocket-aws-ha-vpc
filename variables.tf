@@ -217,9 +217,9 @@ variable "ebs_disk_size" {
 }
 
 variable "ebs_disk_type" {
-  description = "Size of disk"
+  description = "EBS volume type"
   type        = string
-  default     = "gp2"
+  default     = "gp3"
 }
 
 variable "license_id" {
