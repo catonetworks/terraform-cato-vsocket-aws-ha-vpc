@@ -60,4 +60,8 @@
 
  ### Features
   - Updated README.md to fix errors 
- 
+
+## 0.1.2 (2025-05-30)
+
+### Features
+- Adjusted EBS Disk type from GP2 to GP3 
