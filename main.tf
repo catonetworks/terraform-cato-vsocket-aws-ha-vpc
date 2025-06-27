@@ -17,11 +17,6 @@ resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
 }
 
-# Lookup data from region and VPC - Always needed for availability zones
-data "aws_availability_zones" "available_zones" {
-  state = "available"
-}
-
 # Subnets
 resource "aws_subnet" "mgmt_subnet_primary" {
   vpc_id            = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
@@ -343,27 +338,21 @@ resource "cato_socket_site" "aws-site" {
   description     = var.site_description
   name            = var.site_name
   native_range = {
-    native_network_range = var.native_network_range
+    native_network_range = var.subnet_range_lan_primary #Native_network_Range is inferred by the Socket Lan Subnet Primary
     local_ip             = var.lan_eni_primary_ip
   }
-  site_location = var.site_location
+  site_location = local.cur_site_location
   site_type     = var.site_type
 }
 
-data "cato_accountSnapshotSite" "aws-site-primary" {
-  id = cato_socket_site.aws-site.id
-}
 
-locals {
-  primary_serial = [for s in data.cato_accountSnapshotSite.aws-site-primary.info.sockets : s.serial if s.is_primary == true]
-  sanitized_name = replace(replace(replace(replace(replace(replace(
-    var.site_name,
-    "/", ""),
-    ":", ""),
-    "#", ""),
-    "(", ""),
-    ")", ""),
-  " ", "-")
+resource "cato_network_range" "routedNetworks" {
+  for_each   = var.routed_networks
+  site_id    = cato_socket_site.aws-site.id
+  name       = each.key # The name is the key from the map item.
+  range_type = "Routed"
+  subnet     = each.value # The subnet is the value from the map item.
+  depends_on = [data.cato_accountSnapshotSite.aws-site-2]
 }
 
 # AWS HA IAM role configuration
@@ -419,17 +408,6 @@ resource "aws_iam_instance_profile" "cato_ha_instance_profile" {
   })
 }
 
-## Lookup data from region and VPC
-data "aws_ami" "vsocket" {
-  most_recent = true
-  name_regex  = "VSOCKET_AWS"
-  owners      = ["aws-marketplace"]
-}
-
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-
 # Create Primary vSocket Virtual Machine
 resource "aws_instance" "primary_vsocket" {
   tenancy              = "default"
@@ -472,41 +450,34 @@ resource "null_resource" "sleep_300_seconds" {
   depends_on = [aws_instance.primary_vsocket]
 }
 
-#################################################################################
-# Add secondary socket to site via API until socket_site resource is updated to natively support
-resource "null_resource" "configure_secondary_aws_vsocket" {
+resource "terraform_data" "configure_secondary_aws_vsocket" {
   depends_on = [null_resource.sleep_300_seconds]
 
-  provisioner "local-exec" {
-    command = <<EOF
-      # Execute the GraphQL mutation to get add the secondary vSocket
-      response=$(curl -k -X POST \
-        -H "Accept: application/json" \
-        -H "Content-Type: application/json" \
-        -H "x-API-Key: ${var.token}" \
-        "${var.baseurl}" \
-        --data '{
-          "query": "mutation siteAddSecondaryAwsVSocket($accountId: ID!, $addSecondaryAwsVSocketInput: AddSecondaryAwsVSocketInput!) { site(accountId: $accountId) { addSecondaryAwsVSocket(input: $addSecondaryAwsVSocketInput) { id } } }",
-          "variables": {
-            "accountId": "${var.account_id}",
-            "addSecondaryAwsVSocketInput": {
-              "eniIpAddress": "${var.lan_eni_secondary_ip}",
-              "eniIpSubnet": "${var.subnet_range_lan_secondary}",
-               "routeTableId": "${aws_route_table.lanrt.id}",
-              "site": {
-                "by": "ID",
-                "input": "${cato_socket_site.aws-site.id}"
-              }
-            }
-          },
-          "operationName": "siteAddSecondaryAwsVSocket"
-        }' )
-    EOF
+  # The `input` block serves as the trigger for this resource.
+  # If any of these values change, Terraform will replace the resource,
+  # causing the provisioner to run again. This is the modern replacement
+  # for the `triggers` argument in null_resource.
+  input = {
+    account_id     = var.account_id
+    site_id        = cato_socket_site.aws-site.id
+    eni_ip_address = var.lan_eni_secondary_ip
+    eni_ip_subnet  = var.subnet_range_lan_secondary
+    route_table_id = aws_route_table.lanrt.id
   }
 
-  triggers = {
-    account_id = var.account_id
-    site_id    = cato_socket_site.aws-site.id
+  provisioner "local-exec" {
+    # The command is now cleaner. It calls the curl command and uses the
+    # templatefile() function to dynamically generate the JSON payload from
+    # an external template file. This avoids the large, hard-to-read heredoc.
+    command = templatefile("${path.module}/templates/secondary_socket_payload.json.tftpl", {
+      account_id     = self.input.account_id,
+      site_id        = self.input.site_id,
+      eni_ip_address = self.input.eni_ip_address,
+      eni_ip_subnet  = self.input.eni_ip_subnet,
+      route_table_id = self.input.route_table_id
+      api_token      = var.token
+      baseurl        = var.baseurl
+    })
   }
 }
 
@@ -515,18 +486,7 @@ resource "null_resource" "sleep_30_seconds" {
   provisioner "local-exec" {
     command = "sleep 30"
   }
-  depends_on = [null_resource.configure_secondary_aws_vsocket]
-}
-
-# Retrieve Secondary vSocket Virtual Machine serial
-data "cato_accountSnapshotSite" "aws-site-secondary" {
-  depends_on = [null_resource.sleep_30_seconds]
-  id         = cato_socket_site.aws-site.id
-}
-
-locals {
-  secondary_serial = [for s in data.cato_accountSnapshotSite.aws-site-secondary.info.sockets : s.serial if s.is_primary == false]
-  depends_on       = [data.cato_accountSnapshotSite.aws-site-secondary]
+  depends_on = [terraform_data.configure_secondary_aws_vsocket]
 }
 
 ## vSocket Instance
@@ -570,11 +530,6 @@ resource "null_resource" "sleep_300_seconds-HA" {
     command = "sleep 300"
   }
   depends_on = [aws_instance.secondary_vsocket]
-}
-
-data "cato_accountSnapshotSite" "aws-site-2" {
-  id         = cato_socket_site.aws-site.id
-  depends_on = [null_resource.sleep_300_seconds-HA]
 }
 
 resource "cato_license" "license" {

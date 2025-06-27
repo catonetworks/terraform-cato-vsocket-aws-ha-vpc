@@ -5,7 +5,8 @@ Terraform module which deploys into an new or existing VPC and Internet Gateway,
 For the vpc_id and internet_gateway_id, leave null to create new or add an id of the already created resources to use existing.
 
 ## NOTE
-- For help with finding exact sytax to match site location for city, state_name, country_name and timezone, please refer to the [cato_siteLocation data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation).
+- Site Location for Cato Socket is automatically inferred based on the region being deployed, however this can be overridden if necessary. 
+- For help with finding exact syntax to match site location for city, state_name, country_name and timezone, please refer to the [cato_siteLocation data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation).
 - For help with finding a license id to assign, please refer to the [cato_licensingInfo data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/licensingInfo).
 
 <details>
@@ -63,13 +64,13 @@ module "vsocket-aws-ha-vpc" {
   source                      = "catonetworks/vsocket-aws-ha-vpc/cato"
   token                       = var.token
   account_id                  = var.account_id
+  region                      = var.region
   key_pair                    = "Your-AWS-KeyPair-Name-Here"
   site_name                   = "Your-Cato-site-name-here"
   site_description            = "Your Cato site Description here"
   site_type                   = "CLOUD_DC"
   vpc_id                      = null
   internet_gateway_id         = null
-  native_network_range        = "10.132.0.0/18"
   vpc_range                   = "10.132.0.0/18"
   subnet_range_mgmt_primary   = "10.132.1.0/24"
   subnet_range_mgmt_secondary = "10.132.2.0/24"
@@ -83,26 +84,30 @@ module "vsocket-aws-ha-vpc" {
   wan_eni_secondary_ip        = "10.132.4.6"
   lan_eni_primary_ip          = "10.132.5.5"
   lan_eni_secondary_ip        = "10.132.6.5"
-  ingress_cidr_blocks         = ["0.0.0.0/0"]
   lan_ingress_cidr_blocks     = ["0.0.0.0/0"]
-  site_location = {
-    city         = "London"
-    country_code = "GB"
-    state_code   = null
-    timezone     = "Europe/London"
-  }
+  #Site Location Derived from Region
+  
+  #Example Networks to be routed through to AWS
+  routed_networks = {
+    "Peered-VPC-1" = "10.100.1.0/24"
+    "App-VPC" = "10.100.3.0/24"
+    "DatabaseVPC" = "10.100.2.0/24"
+    }
+
+  #Example Tags
   tags = {
     Test  = "Test tag"
     Test2 = "Test2 tag"
   }
 }
 
+# Example Outputs 
 output "vsocket-ha-output" {
   value = module.vsocket-aws-ha-vpc
 }
 ```
 
-## Imporant note for troubleshooting
+## Important note for troubleshooting
 
 In the event the module fails with the following error, this is an indication that the primary socket instance took longer than 5 minutes to upgrade and initialize.  
 
@@ -113,17 +118,18 @@ outputs.tf line X, in output "secondary_socket_site_serial":
 │     │ data.cato_accountSnapshotSite.aws-site-secondary.info.sockets is list of object with 1 element
 ```
 
-We need to rerun the process to add the secondary socket. To resolve this, simply taint the `null_resource.configure_secondary_aws_vsocket` resource and re-run terraform apply.  
+We need to rerun the process to add the secondary socket. To resolve this, simply taint the `terraform_data.configure_secondary_aws_vsocket` resource and re-run terraform apply.  
+
 Example:
 
 ```
 terraform state list
-terraform taint null_resource.configure_secondary_aws_vsocket
+terraform taint terraform_data.configure_secondary_aws_vsocket
 terraform apply
 ```
 
 ## Site Location Reference
-
+Site Location is automatically inferred based on Region, if you'd like to override this, here is information on how to look up values. 
 For more information on site_location syntax, use the [Cato CLI](https://github.com/catonetworks/cato-cli) to lookup values.
 
 ```bash
@@ -148,15 +154,18 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.98.0 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.27 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-| <a name="provider_cato"></a> [cato](#provider\_cato) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.98.0 |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.27 |
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
+| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
 
@@ -207,17 +216,18 @@ No modules.
 | [aws_subnet.wan_subnet_secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.cato-vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
 | [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
+| [cato_network_range.routedNetworks](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/network_range) | resource |
 | [cato_socket_site.aws-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
-| [null_resource.configure_secondary_aws_vsocket](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.sleep_300_seconds](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.sleep_300_seconds-HA](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.sleep_30_seconds](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [terraform_data.configure_secondary_aws_vsocket](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [aws_ami.vsocket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
-| [aws_availability_zones.available_zones](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
 | [cato_accountSnapshotSite.aws-site-2](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 | [cato_accountSnapshotSite.aws-site-primary](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 | [cato_accountSnapshotSite.aws-site-secondary](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_siteLocation.site_location](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation) | data source |
 
 ## Inputs
 
@@ -227,8 +237,7 @@ No modules.
 | <a name="input_baseurl"></a> [baseurl](#input\_baseurl) | Cato Networks API URL | `string` | `"https://api.catonetworks.com/api/v1/graphql2"` | no |
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Model of Cato vsocket | `string` | `"SOCKET_AWS1500"` | no |
 | <a name="input_ebs_disk_size"></a> [ebs\_disk\_size](#input\_ebs\_disk\_size) | Size of disk | `number` | `32` | no |
-| <a name="input_ebs_disk_type"></a> [ebs\_disk\_type](#input\_ebs\_disk\_type) | Size of disk | `string` | `"gp2"` | no |
-| <a name="input_ingress_cidr_blocks"></a> [ingress\_cidr\_blocks](#input\_ingress\_cidr\_blocks) | Set CIDR to receive traffic from the specified IPv4 CIDR address ranges<br/>	For example x.x.x.x/32 to allow one specific IP address access, 0.0.0.0/0 to allow all IP addresses access, or another CIDR range<br/>    Best practice is to allow a few IPs as possible<br/>    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X | `list(any)` | n/a | yes |
+| <a name="input_ebs_disk_type"></a> [ebs\_disk\_type](#input\_ebs\_disk\_type) | EBS volume type | `string` | `"gp3"` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type of the vSocket | `string` | `"c5.xlarge"` | no |
 | <a name="input_internet_gateway_id"></a> [internet\_gateway\_id](#input\_internet\_gateway\_id) | Specify an Internet Gateway ID to use. If not specified, a new Internet Gateway will be created. | `string` | `null` | no |
 | <a name="input_key_pair"></a> [key\_pair](#input\_key\_pair) | Name of an existing Key Pair for AWS encryption | `string` | n/a | yes |
@@ -239,9 +248,10 @@ No modules.
 | <a name="input_license_id"></a> [license\_id](#input\_license\_id) | The license ID for the Cato vSocket of license type CATO\_SITE, CATO\_SSE\_SITE, CATO\_PB, CATO\_PB\_SSE.  Example License ID value: 'abcde123-abcd-1234-abcd-abcde1234567'.  Note that licenses are for commercial accounts, and not supported for trial accounts. | `string` | `null` | no |
 | <a name="input_mgmt_eni_primary_ip"></a> [mgmt\_eni\_primary\_ip](#input\_mgmt\_eni\_primary\_ip) | Choose an IP Address within the Management Subnet. You CANNOT use the first four assignable IP addresses within the subnet as it's reserved for the AWS virtual router interface. The accepted input format is X.X.X.X | `string` | n/a | yes |
 | <a name="input_mgmt_eni_secondary_ip"></a> [mgmt\_eni\_secondary\_ip](#input\_mgmt\_eni\_secondary\_ip) | Choose an IP Address within the Management Subnet. You CANNOT use the first four assignable IP addresses within the subnet as it's reserved for the AWS virtual router interface. The accepted input format is X.X.X.X | `string` | n/a | yes |
-| <a name="input_native_network_range"></a> [native\_network\_range](#input\_native\_network\_range) | Choose a unique range for your new vsocket site that does not conflict with the rest of your Wide Area Network.<br/>    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X | `string` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | AWS Region | `string` | n/a | yes |
+| <a name="input_routed_networks"></a> [routed\_networks](#input\_routed\_networks) | A map of routed networks to be accessed behind the vSocket site. The key is the network name and the value is the CIDR range.<br/>  Example: <br/>  routed\_networks = {<br/>  "Peered-VNET-1" = "10.100.1.0/24"<br/>  "On-Prem-Network" = "192.168.50.0/24"<br/>  "Management-Subnet" = "10.100.2.0/25"<br/>  } | `map(string)` | `{}` | no |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | Description of the vsocket site | `string` | n/a | yes |
-| <a name="input_site_location"></a> [site\_location](#input\_site\_location) | The Site Location Data | <pre>object({<br/>    city         = string<br/>    country_code = string<br/>    state_code   = string<br/>    timezone     = string<br/>  })</pre> | n/a | yes |
+| <a name="input_site_location"></a> [site\_location](#input\_site\_location) | Site location which is used by the Cato Socket to connect to the closest Cato PoP. If not specified, the location will be derived from the Azure region dynamicaly. | <pre>object({<br/>    city         = string<br/>    country_code = string<br/>    state_code   = string<br/>    timezone     = string<br/>  })</pre> | <pre>{<br/>  "city": null,<br/>  "country_code": null,<br/>  "state_code": null,<br/>  "timezone": null<br/>}</pre> | no |
 | <a name="input_site_name"></a> [site\_name](#input\_site\_name) | Name of the vsocket site | `string` | n/a | yes |
 | <a name="input_site_type"></a> [site\_type](#input\_site\_type) | The type of the site | `string` | `"CLOUD_DC"` | no |
 | <a name="input_subnet_range_lan_primary"></a> [subnet\_range\_lan\_primary](#input\_subnet\_range\_lan\_primary) | Choose a range within the VPC to use as the Private/LAN subnet. This subnet will host the target LAN interface of the vSocket so resources in the VPC (or AWS Region) can route to the Cato Cloud.<br/>    The minimum subnet length to support High Availability is /29.<br/>    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X | `string` | n/a | yes |
@@ -285,6 +295,7 @@ No modules.
 | <a name="output_mgmteip_secondary"></a> [mgmteip\_secondary](#output\_mgmteip\_secondary) | Public IP address of the secondary management Elastic IP |
 | <a name="output_sg_external"></a> [sg\_external](#output\_sg\_external) | ID of the external security group that governs Internet‑facing traffic |
 | <a name="output_sg_internal"></a> [sg\_internal](#output\_sg\_internal) | ID of the internal security group that controls traffic for vSockets |
+| <a name="output_site_location"></a> [site\_location](#output\_site\_location) | n/a |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC ID (existing or newly created) hosting the vSocket resources |
 | <a name="output_wan_eni_primary_id"></a> [wan\_eni\_primary\_id](#output\_wan\_eni\_primary\_id) | WAN ENI ID for outbound Internet connectivity on the first vSocket |
 | <a name="output_wan_eni_secondary_id"></a> [wan\_eni\_secondary\_id](#output\_wan\_eni\_secondary\_id) | WAN ENI ID for outbound Internet connectivity on the standby vSocket |
