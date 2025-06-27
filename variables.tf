@@ -7,7 +7,7 @@ variable "baseurl" {
 variable "token" {
   description = "Cato API token"
   type        = string
-  #sensitive   = true
+  sensitive   = true
 }
 
 variable "account_id" {
