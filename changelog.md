@@ -65,3 +65,19 @@
 
 ### Features
 - Adjusted EBS Disk type from GP2 to GP3 
+
+
+## 0.1.3 (2025-06-27)
+This release focuses on adding new networking features, simplifying configuration, improving stability, and refactoring the codebase for long-term maintenance.
+
+### New Features
+* **Added Support for Routed Networks:** Introduced a new `routed_networks` variable. This allows you to define a map of network names and CIDR ranges that should be routed through the Cato site, which are configured via the new `cato_network_range` resource.
+* **Automatic Site Location:** The `site_location` is now automatically derived from the configured AWS `region`, simplifying site creation. As a result, the `site_location` variable is now optional.
+* **Simplified Native Network Configuration:** To reduce user input, the `native_network_range` variable has been removed. Its value is now automatically inferred from the `subnet_range_lan_primary`.
+### Bug Fixes
+* **Fix Routed Network Creation Order:** Resolved a race condition by adding an explicit `depends_on` block to the new routed network resources. This ensures the Cato site is fully provisioned before attempting to add networks, preventing potential API errors.
+### Housekeeping & Refactoring
+* **Modernize Resource Triggers:** Replaced the legacy `null_resource` with the modern `terraform_data` resource for configuring the secondary vSocket. The `local-exec` provisioner was also refactored to use a separate `templatefile` for the API payload, significantly improving code readability and maintenance.
+* **Code Cleanup:** Removed several unused variables (`ingress_cidr_blocks`), data sources (`aws_ami`, `aws_availability_zones`), and `locals` as identified by `tflint`.
+* **Updated Default EBS Volume Type:** The default `ebs_disk_type` for the vSocket instances has been changed from `gp2` to the more modern and cost-effective `gp3`.
+* **Updated Dependency Versions:** Raised the minimum required versions for Terraform (`>= 1.5`), the AWS provider (`>= 5.98.0`), and the Cato provider (`>= 0.0.27`) to ensure compatibility with new features and best practices.
