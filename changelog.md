@@ -81,3 +81,9 @@ This release focuses on adding new networking features, simplifying configuratio
 * **Code Cleanup:** Removed several unused variables (`ingress_cidr_blocks`), data sources (`aws_ami`, `aws_availability_zones`), and `locals` as identified by `tflint`.
 * **Updated Default EBS Volume Type:** The default `ebs_disk_type` for the vSocket instances has been changed from `gp2` to the more modern and cost-effective `gp3`.
 * **Updated Dependency Versions:** Raised the minimum required versions for Terraform (`>= 1.5`), the AWS provider (`>= 5.98.0`), and the Cato provider (`>= 0.0.27`) to ensure compatibility with new features and best practices.
+
+## 0.1.4 (2025-07-16)
+
+### Features
+ - Update site_location to latest revision 
+ - version lock cato provider to version 0.0.30
