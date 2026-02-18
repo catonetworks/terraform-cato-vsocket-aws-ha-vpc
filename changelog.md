@@ -94,3 +94,6 @@ This release focuses on adding new networking features, simplifying configuratio
  - Updated to use latest provider version 
   - Adjusted routed_networks call to include interface_index 
  - Version Lock to Provider version 0.0.38 or greater
+
+## 0.1.6 (2026-02-18)
+  - Reverted to provider version 0.0.57 to address local_ip and gateway api param issue in state
