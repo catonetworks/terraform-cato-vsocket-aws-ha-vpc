@@ -235,3 +235,124 @@ variable "region" {
   description = "AWS Region"
   type        = string
 }
+
+variable "internal_sg_ingress" {
+  description = "Ingress rules for internal security group"
+  type = list(object({
+    description      = string
+    protocol         = number
+    from_port        = number
+    to_port          = number
+    cidr_blocks      = list(string)
+    ipv6_cidr_blocks = list(string)
+    prefix_list_ids  = list(string)
+    security_groups  = list(string)
+    self             = bool
+  }))
+  default = [
+    {
+      description      = "Allow all traffic Outbound"
+      protocol         = -1
+      from_port        = 0
+      to_port          = 0
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    }
+  ]
+}
+
+variable "internal_sg_egress" {
+  description = "Egress rules for internal security group"
+  type = list(object({
+    description      = string
+    protocol         = string
+    from_port        = number
+    to_port          = number
+    cidr_blocks      = list(string)
+    ipv6_cidr_blocks = list(string)
+    prefix_list_ids  = list(string)
+    security_groups  = list(string)
+    self             = bool
+  }))
+  default = []
+}
+
+variable "external_sg_ingress" {
+  description = "Egress rules for external security group"
+  type = list(object({
+    description      = string
+    protocol         = string
+    from_port        = number
+    to_port          = number
+    cidr_blocks      = list(string)
+    ipv6_cidr_blocks = list(string)
+    prefix_list_ids  = list(string)
+    security_groups  = list(string)
+    self             = bool
+  }))
+  default = []
+}
+
+variable "external_sg_egress" {
+  description = "Egress rules for external security group"
+  type = list(object({
+    description      = string
+    protocol         = string
+    from_port        = number
+    to_port          = number
+    cidr_blocks      = list(string)
+    ipv6_cidr_blocks = list(string)
+    prefix_list_ids  = list(string)
+    security_groups  = list(string)
+    self             = bool
+  }))
+  default = [
+    {
+      description      = "Allow HTTPS Outbound"
+      protocol         = "tcp"
+      from_port        = 443
+      to_port          = 443
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    },
+    {
+      description      = "Allow DTLS Outbound"
+      protocol         = "udp"
+      from_port        = 443
+      to_port          = 443
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    },
+    {
+      description      = "Allow DNS-UDP Outbound"
+      protocol         = "udp"
+      from_port        = 53
+      to_port          = 53
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    },
+    {
+      description      = "Allow DNS-TCP Outbound"
+      protocol         = "tcp"
+      from_port        = 53
+      to_port          = 53
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    }
+  ]
+}

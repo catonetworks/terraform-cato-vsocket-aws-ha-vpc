@@ -162,14 +162,14 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.98.0 |
-| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.38 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | 0.0.57 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.98.0 |
-| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.38 |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | 0.0.57 |
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
@@ -221,19 +221,19 @@ No modules.
 | [aws_subnet.wan_subnet_primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.wan_subnet_secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.cato-vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
-| [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
-| [cato_network_range.routedNetworks](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/network_range) | resource |
-| [cato_socket_site.aws-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
+| [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/0.0.57/docs/resources/license) | resource |
+| [cato_network_range.routedNetworks](https://registry.terraform.io/providers/catonetworks/cato/0.0.57/docs/resources/network_range) | resource |
+| [cato_socket_site.aws-site](https://registry.terraform.io/providers/catonetworks/cato/0.0.57/docs/resources/socket_site) | resource |
 | [null_resource.sleep_300_seconds](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.sleep_300_seconds-HA](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.sleep_30_seconds](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [terraform_data.configure_secondary_aws_vsocket](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [aws_ami.vsocket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
-| [cato_accountSnapshotSite.aws-site-2](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
-| [cato_accountSnapshotSite.aws-site-primary](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
-| [cato_accountSnapshotSite.aws-site-secondary](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
-| [cato_siteLocation.site_location](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation) | data source |
+| [cato_accountSnapshotSite.aws-site-2](https://registry.terraform.io/providers/catonetworks/cato/0.0.57/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_accountSnapshotSite.aws-site-primary](https://registry.terraform.io/providers/catonetworks/cato/0.0.57/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_accountSnapshotSite.aws-site-secondary](https://registry.terraform.io/providers/catonetworks/cato/0.0.57/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_siteLocation.site_location](https://registry.terraform.io/providers/catonetworks/cato/0.0.57/docs/data-sources/siteLocation) | data source |
 
 ## Inputs
 
@@ -244,7 +244,11 @@ No modules.
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Model of Cato vsocket | `string` | `"SOCKET_AWS1500"` | no |
 | <a name="input_ebs_disk_size"></a> [ebs\_disk\_size](#input\_ebs\_disk\_size) | Size of disk | `number` | `32` | no |
 | <a name="input_ebs_disk_type"></a> [ebs\_disk\_type](#input\_ebs\_disk\_type) | EBS volume type | `string` | `"gp3"` | no |
+| <a name="input_external_sg_egress"></a> [external\_sg\_egress](#input\_external\_sg\_egress) | Egress rules for external security group | <pre>list(object({<br/>    description      = string<br/>    protocol         = string<br/>    from_port        = number<br/>    to_port          = number<br/>    cidr_blocks      = list(string)<br/>    ipv6_cidr_blocks = list(string)<br/>    prefix_list_ids  = list(string)<br/>    security_groups  = list(string)<br/>    self             = bool<br/>  }))</pre> | <pre>[<br/>  {<br/>    "cidr_blocks": [<br/>      "0.0.0.0/0"<br/>    ],<br/>    "description": "Allow HTTPS Outbound",<br/>    "from_port": 443,<br/>    "ipv6_cidr_blocks": [],<br/>    "prefix_list_ids": [],<br/>    "protocol": "tcp",<br/>    "security_groups": [],<br/>    "self": false,<br/>    "to_port": 443<br/>  },<br/>  {<br/>    "cidr_blocks": [<br/>      "0.0.0.0/0"<br/>    ],<br/>    "description": "Allow DTLS Outbound",<br/>    "from_port": 443,<br/>    "ipv6_cidr_blocks": [],<br/>    "prefix_list_ids": [],<br/>    "protocol": "udp",<br/>    "security_groups": [],<br/>    "self": false,<br/>    "to_port": 443<br/>  },<br/>  {<br/>    "cidr_blocks": [<br/>      "0.0.0.0/0"<br/>    ],<br/>    "description": "Allow DNS-UDP Outbound",<br/>    "from_port": 53,<br/>    "ipv6_cidr_blocks": [],<br/>    "prefix_list_ids": [],<br/>    "protocol": "udp",<br/>    "security_groups": [],<br/>    "self": false,<br/>    "to_port": 53<br/>  },<br/>  {<br/>    "cidr_blocks": [<br/>      "0.0.0.0/0"<br/>    ],<br/>    "description": "Allow DNS-TCP Outbound",<br/>    "from_port": 53,<br/>    "ipv6_cidr_blocks": [],<br/>    "prefix_list_ids": [],<br/>    "protocol": "tcp",<br/>    "security_groups": [],<br/>    "self": false,<br/>    "to_port": 53<br/>  }<br/>]</pre> | no |
+| <a name="input_external_sg_ingress"></a> [external\_sg\_ingress](#input\_external\_sg\_ingress) | Egress rules for external security group | <pre>list(object({<br/>    description      = string<br/>    protocol         = string<br/>    from_port        = number<br/>    to_port          = number<br/>    cidr_blocks      = list(string)<br/>    ipv6_cidr_blocks = list(string)<br/>    prefix_list_ids  = list(string)<br/>    security_groups  = list(string)<br/>    self             = bool<br/>  }))</pre> | `[]` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type of the vSocket | `string` | `"c5.xlarge"` | no |
+| <a name="input_internal_sg_egress"></a> [internal\_sg\_egress](#input\_internal\_sg\_egress) | Egress rules for internal security group | <pre>list(object({<br/>    description      = string<br/>    protocol         = string<br/>    from_port        = number<br/>    to_port          = number<br/>    cidr_blocks      = list(string)<br/>    ipv6_cidr_blocks = list(string)<br/>    prefix_list_ids  = list(string)<br/>    security_groups  = list(string)<br/>    self             = bool<br/>  }))</pre> | `[]` | no |
+| <a name="input_internal_sg_ingress"></a> [internal\_sg\_ingress](#input\_internal\_sg\_ingress) | Ingress rules for internal security group | <pre>list(object({<br/>    description      = string<br/>    protocol         = number<br/>    from_port        = number<br/>    to_port          = number<br/>    cidr_blocks      = list(string)<br/>    ipv6_cidr_blocks = list(string)<br/>    prefix_list_ids  = list(string)<br/>    security_groups  = list(string)<br/>    self             = bool<br/>  }))</pre> | <pre>[<br/>  {<br/>    "cidr_blocks": [<br/>      "0.0.0.0/0"<br/>    ],<br/>    "description": "Allow all traffic Outbound",<br/>    "from_port": 0,<br/>    "ipv6_cidr_blocks": [],<br/>    "prefix_list_ids": [],<br/>    "protocol": -1,<br/>    "security_groups": [],<br/>    "self": false,<br/>    "to_port": 0<br/>  }<br/>]</pre> | no |
 | <a name="input_internet_gateway_id"></a> [internet\_gateway\_id](#input\_internet\_gateway\_id) | Specify an Internet Gateway ID to use. If not specified, a new Internet Gateway will be created. | `string` | `null` | no |
 | <a name="input_key_pair"></a> [key\_pair](#input\_key\_pair) | Name of an existing Key Pair for AWS encryption | `string` | n/a | yes |
 | <a name="input_lan_eni_primary_ip"></a> [lan\_eni\_primary\_ip](#input\_lan\_eni\_primary\_ip) | Choose an IP Address within the LAN Subnet for the Primary lan interface. You CANNOT use the first four assignable IP addresses within the subnet as it's reserved for the AWS virtual router interface. The accepted input format is X.X.X.X | `string` | n/a | yes |

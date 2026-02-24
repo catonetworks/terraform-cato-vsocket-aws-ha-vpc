@@ -97,3 +97,8 @@ This release focuses on adding new networking features, simplifying configuratio
 
 ## 0.1.6 (2026-02-18)
   - Reverted to provider version 0.0.57 to address local_ip and gateway api param issue in state
+
+## 0.1.7 (2026-02-24)
+
+### Features
+- Added variables for security group ingress and egress for internal and external

@@ -74,95 +74,27 @@ resource "aws_subnet" "lan_subnet_secondary" {
 
 # Internal and External Security Groups
 resource "aws_security_group" "internal_sg" {
-  name        = "${var.site_name}-Internal-SG"
+  name        = "${var.site_name}-Cato-Internal-SG"
   description = "CATO LAN Security Group - Allow all traffic Inbound"
   vpc_id      = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  ingress = [
-    {
-      description      = "Allow all traffic Inbound from Ingress CIDR Blocks"
-      protocol         = -1
-      from_port        = 0
-      to_port          = 0
-      cidr_blocks      = var.lan_ingress_cidr_blocks
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    }
-  ]
-  egress = [
-    {
-      description      = "Allow all traffic Outbound"
-      protocol         = -1
-      from_port        = 0
-      to_port          = 0
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    }
-  ]
+  egress = var.internal_sg_egress
+  ingress = var.internal_sg_ingress
   tags = merge(var.tags, {
     name = "${var.site_name}-Cato-Internal-SG"
   })
 }
 
 resource "aws_security_group" "external_sg" {
-  name        = "${var.site_name}-External-SG-MGMT"
-  description = "CATO MGMT Security Group - Allow HTTPS In"
+  name        = "${var.site_name}-Cato-External-SG"
+  description = "CATO WAN Security Group"
   vpc_id      = var.vpc_id == null ? aws_vpc.cato-vpc[0].id : var.vpc_id
-  ingress     = []
-  egress = [
-    {
-      description      = "Allow HTTPS Outbound"
-      protocol         = "tcp"
-      from_port        = 443
-      to_port          = 443
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    },
-    {
-      description      = "Allow DTLS Outbound"
-      protocol         = "udp"
-      from_port        = 443
-      to_port          = 443
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    },
-    {
-      description      = "Allow DNS-UDP Outbound"
-      protocol         = "udp"
-      from_port        = 53
-      to_port          = 53
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    },
-    {
-      description      = "Allow DNS-TCP Outbound"
-      protocol         = "tcp"
-      from_port        = 53
-      to_port          = 53
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    }
-  ]
+  ingress     = var.external_sg_ingress
+  egress = var.external_sg_egress
   tags = merge(var.tags, {
     name = "${var.site_name}-Cato-External-SG"
   })
 }
+
 
 # vSocket Network Interfaces
 resource "aws_network_interface" "mgmteni_primary" {
