@@ -277,7 +277,19 @@ variable "internal_sg_egress" {
     security_groups  = list(string)
     self             = bool
   }))
-  default = []
+  default = [
+    {
+      description      = "Allow all traffic Outbound"
+      protocol         = "-1"
+      from_port        = 0
+      to_port          = 0
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      security_groups  = []
+      self             = false
+    }
+  ]
 }
 
 variable "external_sg_ingress" {
@@ -311,43 +323,10 @@ variable "external_sg_egress" {
   }))
   default = [
     {
-      description      = "Allow HTTPS Outbound"
-      protocol         = "tcp"
-      from_port        = 443
-      to_port          = 443
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    },
-    {
-      description      = "Allow DTLS Outbound"
-      protocol         = "udp"
-      from_port        = 443
-      to_port          = 443
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    },
-    {
-      description      = "Allow DNS-UDP Outbound"
-      protocol         = "udp"
-      from_port        = 53
-      to_port          = 53
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = []
-      prefix_list_ids  = []
-      security_groups  = []
-      self             = false
-    },
-    {
-      description      = "Allow DNS-TCP Outbound"
-      protocol         = "tcp"
-      from_port        = 53
-      to_port          = 53
+      description      = "Allow all traffic Outbound"
+      protocol         = "-1"
+      from_port        = 0
+      to_port          = 0
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = []
       prefix_list_ids  = []

@@ -351,40 +351,55 @@ resource "aws_instance" "primary_vsocket" {
   iam_instance_profile = aws_iam_instance_profile.cato_ha_instance_profile.name
   # Network Interfaces
   # MGMTENI
-  network_interface {
-    device_index         = 0
+  primary_network_interface {
     network_interface_id = aws_network_interface.mgmteni_primary.id
-  }
-  # WANENI
-  network_interface {
-    device_index         = 1
-    network_interface_id = aws_network_interface.waneni_primary.id
-  }
-  # LANENI
-  network_interface {
-    device_index         = 2
-    network_interface_id = aws_network_interface.laneni_primary.id
   }
   ebs_block_device {
     device_name = "/dev/sda1"
     volume_size = var.ebs_disk_size
     volume_type = var.ebs_disk_type
+    encrypted   = true
   }
   tags = merge(var.tags, {
     Name = "${var.site_name}-vSocket-Primary"
   })
 }
 
-# To allow socket to upgrade so secondary socket can be added
-resource "null_resource" "sleep_300_seconds" {
+# WANENI
+resource "aws_network_interface_attachment" "wan-primary-int" {
+  instance_id          = aws_instance.primary_vsocket.id
+  network_interface_id = aws_network_interface.waneni_primary.id
+  device_index         = 1
+}
+
+# LANENI
+resource "aws_network_interface_attachment" "lan-primary-int" {
+  instance_id          = aws_instance.primary_vsocket.id
+  network_interface_id = aws_network_interface.laneni_primary.id
+  device_index         = 2
+}
+
+resource "null_resource" "primary_reboot_once" {
+  # Only runs on creation, not subsequent applies
+  triggers = {
+    instance_id = aws_instance.primary_vsocket.id
+  }
   provisioner "local-exec" {
-    command = "sleep 300"
+    command = "sleep 15 && aws ec2 reboot-instances --instance-ids ${aws_instance.primary_vsocket.id} --region ${var.region}"
+  }
+  depends_on = [aws_instance.primary_vsocket]
+}
+
+# To allow socket to upgrade so secondary socket can be added
+resource "null_resource" "sleep_500_seconds" {
+  provisioner "local-exec" {
+    command = "sleep 500"
   }
   depends_on = [aws_instance.primary_vsocket]
 }
 
 resource "terraform_data" "configure_secondary_aws_vsocket" {
-  depends_on = [null_resource.sleep_300_seconds]
+  depends_on = [null_resource.sleep_500_seconds]
 
   # The `input` block serves as the trigger for this resource.
   # If any of these values change, Terraform will replace the resource,
@@ -428,34 +443,51 @@ resource "aws_instance" "secondary_vsocket" {
   ami                  = data.aws_ami.vsocket.id
   key_name             = var.key_pair
   instance_type        = var.instance_type
-  user_data_base64     = base64encode(local.secondary_serial[0])
+  user_data_base64     = base64encode("local.secondary_serial[0]")
+  # user_data_base64     = base64encode(local.secondary_serial[0])
   iam_instance_profile = aws_iam_instance_profile.cato_ha_instance_profile.name
   # Network Interfaces
   # MGMTENI
-  network_interface {
-    device_index         = 0
+  primary_network_interface {
     network_interface_id = aws_network_interface.mgmteni_secondary.id
-  }
-  # WANENI
-  network_interface {
-    device_index         = 1
-    network_interface_id = aws_network_interface.waneni_secondary.id
-  }
-  # LANENI
-  network_interface {
-    device_index         = 2
-    network_interface_id = aws_network_interface.laneni_secondary.id
   }
   ebs_block_device {
     device_name = "/dev/sda1"
     volume_size = var.ebs_disk_size
     volume_type = var.ebs_disk_type
+    encrypted   = true
   }
   tags = merge(var.tags, {
     Name = "${var.site_name}-vSocket-Secondary"
   })
   depends_on = [null_resource.sleep_30_seconds]
 }
+
+# WANENI
+resource "aws_network_interface_attachment" "wan-secondary-int" {
+  instance_id          = aws_instance.secondary_vsocket.id
+  network_interface_id = aws_network_interface.waneni_secondary.id
+  device_index         = 1
+}
+
+# LANENI
+resource "aws_network_interface_attachment" "lan-secondary-int" {
+  instance_id          = aws_instance.secondary_vsocket.id
+  network_interface_id = aws_network_interface.laneni_secondary.id
+  device_index         = 2
+}
+
+resource "null_resource" "secondary_reboot_once" {
+  # Only runs on creation, not subsequent applies
+  triggers = {
+    instance_id = aws_instance.secondary_vsocket.id
+  }
+  provisioner "local-exec" {
+    command = "sleep 15 && aws ec2 reboot-instances --instance-ids ${aws_instance.secondary_vsocket.id} --region ${var.region}"
+  }
+  depends_on = [aws_instance.secondary_vsocket]
+}
+
 
 # To allow sockets to configure HA
 resource "null_resource" "sleep_300_seconds-HA" {

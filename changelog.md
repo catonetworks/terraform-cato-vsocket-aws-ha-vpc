@@ -102,3 +102,8 @@ This release focuses on adding new networking features, simplifying configuratio
 
 ### Features
 - Added variables for security group ingress and egress for internal and external
+
+## 0.1.8 (2026-03-12)
+
+### Features
+- Updated disk to be encrypted and updated network interfaces to use new convention of primary and aws_network_interface_attachment
