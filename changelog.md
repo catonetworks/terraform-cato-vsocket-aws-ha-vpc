@@ -107,3 +107,8 @@ This release focuses on adding new networking features, simplifying configuratio
 
 ### Features
 - Updated disk to be encrypted and updated network interfaces to use new convention of primary and aws_network_interface_attachment
+
+## 0.1.9 (2026-03-18)
+
+### Features
+- Updated user data on secondary instance fixing syntax issue

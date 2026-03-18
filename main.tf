@@ -443,8 +443,7 @@ resource "aws_instance" "secondary_vsocket" {
   ami                  = data.aws_ami.vsocket.id
   key_name             = var.key_pair
   instance_type        = var.instance_type
-  user_data_base64     = base64encode("local.secondary_serial[0]")
-  # user_data_base64     = base64encode(local.secondary_serial[0])
+  user_data_base64     = base64encode(local.secondary_serial[0])
   iam_instance_profile = aws_iam_instance_profile.cato_ha_instance_profile.name
   # Network Interfaces
   # MGMTENI
