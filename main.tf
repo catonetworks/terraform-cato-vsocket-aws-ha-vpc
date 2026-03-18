@@ -387,15 +387,21 @@ resource "null_resource" "primary_reboot_once" {
   provisioner "local-exec" {
     command = "sleep 15 && aws ec2 reboot-instances --instance-ids ${aws_instance.primary_vsocket.id} --region ${var.region}"
   }
-  depends_on = [aws_instance.primary_vsocket]
+  depends_on = [aws_instance.primary_vsocket, aws_network_interface_attachment.wan-primary-int, aws_network_interface_attachment.lan-primary-int]
 }
 
-# To allow socket to upgrade so secondary socket can be added
 resource "null_resource" "sleep_500_seconds" {
+  triggers = {
+    instance_id = aws_instance.primary_vsocket.id
+  }
+
   provisioner "local-exec" {
     command = "sleep 500"
   }
-  depends_on = [aws_instance.primary_vsocket]
+
+  depends_on = [
+    null_resource.primary_reboot_once
+  ]
 }
 
 resource "terraform_data" "configure_secondary_aws_vsocket" {
@@ -484,16 +490,21 @@ resource "null_resource" "secondary_reboot_once" {
   provisioner "local-exec" {
     command = "sleep 15 && aws ec2 reboot-instances --instance-ids ${aws_instance.secondary_vsocket.id} --region ${var.region}"
   }
-  depends_on = [aws_instance.secondary_vsocket]
+  depends_on = [aws_instance.secondary_vsocket, aws_network_interface_attachment.wan-secondary-int, aws_network_interface_attachment.lan-secondary-int]
 }
 
-
-# To allow sockets to configure HA
 resource "null_resource" "sleep_300_seconds-HA" {
+  triggers = {
+    instance_id = aws_instance.secondary_vsocket.id
+  }
+
   provisioner "local-exec" {
     command = "sleep 300"
   }
-  depends_on = [aws_instance.secondary_vsocket]
+
+  depends_on = [
+    null_resource.secondary_reboot_once
+  ]
 }
 
 resource "cato_license" "license" {
