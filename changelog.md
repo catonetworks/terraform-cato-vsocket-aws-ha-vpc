@@ -113,3 +113,8 @@ This release focuses on adding new networking features, simplifying configuratio
 ### Features
 - Updated user data on secondary instance fixing syntax issue
 - Updated reboot and sleep function sequence to fix issue introduced by migration to new interface attachment convention 
+
+## 0.1.10 (2026-03-30)
+
+### Features
+- Update module adding lifecycle.ignore_changes for ami on socket instance
