@@ -118,3 +118,7 @@ This release focuses on adding new networking features, simplifying configuratio
 
 ### Features
 - Update module adding lifecycle.ignore_changes for ami on socket instance
+
+## 0.1.11 (2026-04-10)
+### Features
+- Updated version of provider adding in lastest SDK with updated ENUM values for accounSnapshot and license

@@ -43,6 +43,19 @@ Reference the resources as input variables with the following syntax:
 ## Usage
 
 ```hcl
+terraform {
+  required_providers {
+    cato = {
+      source = "catonetworks/cato"
+      version = "0.0.57-1"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.98.00"
+    }
+  }
+}
+
 provider "cato" {
   baseurl    = var.baseurl
   account_id = var.account_id
