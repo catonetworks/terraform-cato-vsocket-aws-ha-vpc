@@ -122,3 +122,7 @@ This release focuses on adding new networking features, simplifying configuratio
 ## 0.1.11 (2026-04-10)
 ### Features
 - Updated version of provider adding in lastest SDK with updated ENUM values for accounSnapshot and license
+
+## 0.1.12 (2026-06-03)
+### Features
+- Updated to use latest provider version 
