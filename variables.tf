@@ -187,6 +187,23 @@ variable "tags" {
   default     = {}
 }
 
+variable "dhcp_options" {
+  description = <<EOT
+    Optional DHCP options set for the VPC created by this module.
+    When null (default), AWS default DHCP options are used (AmazonProvidedDNS).
+    When set, a new aws_vpc_dhcp_options resource is created and associated
+    with the VPC. Only applied when the module creates the VPC (vpc_id == null).
+  EOT
+  type = object({
+    domain_name          = optional(string)
+    domain_name_servers  = optional(list(string))
+    ntp_servers          = optional(list(string))
+    netbios_name_servers = optional(list(string))
+    netbios_node_type    = optional(string)
+  })
+  default = null
+}
+
 variable "connection_type" {
   description = "Model of Cato vsocket"
   type        = string

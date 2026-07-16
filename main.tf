@@ -8,6 +8,25 @@ resource "aws_vpc" "cato-vpc" {
   })
 }
 
+# Optional DHCP options set for a module-managed VPC.
+resource "aws_vpc_dhcp_options" "cato_dhcp" {
+  count                = var.dhcp_options != null && var.vpc_id == null ? 1 : 0
+  domain_name          = var.dhcp_options.domain_name
+  domain_name_servers  = var.dhcp_options.domain_name_servers
+  ntp_servers          = var.dhcp_options.ntp_servers
+  netbios_name_servers = var.dhcp_options.netbios_name_servers
+  netbios_node_type    = var.dhcp_options.netbios_node_type
+  tags = merge(var.tags, {
+    Name = "${var.site_name}-DHCP-Options"
+  })
+}
+
+resource "aws_vpc_dhcp_options_association" "cato_dhcp_assoc" {
+  count           = var.dhcp_options != null && var.vpc_id == null ? 1 : 0
+  vpc_id          = aws_vpc.cato-vpc[0].id
+  dhcp_options_id = aws_vpc_dhcp_options.cato_dhcp[0].id
+}
+
 # Internet Gateway
 resource "aws_internet_gateway" "internet_gateway" {
   count = var.internet_gateway_id == null ? 1 : 0
