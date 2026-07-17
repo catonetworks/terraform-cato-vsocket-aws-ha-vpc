@@ -98,6 +98,12 @@ module "vsocket-aws-ha-vpc" {
   lan_eni_primary_ip          = "10.132.5.5"
   lan_eni_secondary_ip        = "10.132.6.5"
   lan_ingress_cidr_blocks     = ["0.0.0.0/0"]
+
+  # Customize VPC DNS settings to use trusted, reachable Cato DNS resolvers.
+  dhcp_options = {
+    domain_name_servers = ["10.254.254.1", "8.8.8.8"]
+  }
+
   #Site Location Derived from Region
   
   #Example Networks to be routed through to AWS
@@ -238,6 +244,8 @@ No modules.
 | [aws_subnet.wan_subnet_primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.wan_subnet_secondary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.cato-vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
+| [aws_vpc_dhcp_options.cato_dhcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_dhcp_options) | resource |
+| [aws_vpc_dhcp_options_association.cato_dhcp_assoc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_dhcp_options_association) | resource |
 | [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
 | [cato_network_range.routedNetworks](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/network_range) | resource |
 | [cato_socket_site.aws-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
@@ -261,6 +269,7 @@ No modules.
 | <a name="input_account_id"></a> [account\_id](#input\_account\_id) | Cato account ID | `number` | n/a | yes |
 | <a name="input_baseurl"></a> [baseurl](#input\_baseurl) | Cato Networks API URL | `string` | `"https://api.catonetworks.com/api/v1/graphql2"` | no |
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Model of Cato vsocket | `string` | `"SOCKET_AWS1500"` | no |
+| <a name="input_dhcp_options"></a> [dhcp\_options](#input\_dhcp\_options) | Optional DHCP options set for the VPC created by this module.<br/>    When null (default), AWS default DHCP options are used (AmazonProvidedDNS).<br/>    When set, a new aws\_vpc\_dhcp\_options resource is created and associated<br/>    with the VPC. Only applied when the module creates the VPC (vpc\_id == null). | <pre>object({<br/>    domain_name          = optional(string)<br/>    domain_name_servers  = optional(list(string))<br/>    ntp_servers          = optional(list(string))<br/>    netbios_name_servers = optional(list(string))<br/>    netbios_node_type    = optional(string)<br/>  })</pre> | `null` | no |
 | <a name="input_ebs_disk_size"></a> [ebs\_disk\_size](#input\_ebs\_disk\_size) | Size of disk | `number` | `32` | no |
 | <a name="input_ebs_disk_type"></a> [ebs\_disk\_type](#input\_ebs\_disk\_type) | EBS volume type | `string` | `"gp3"` | no |
 | <a name="input_external_sg_egress"></a> [external\_sg\_egress](#input\_external\_sg\_egress) | Egress rules for external security group | <pre>list(object({<br/>    description      = string<br/>    protocol         = string<br/>    from_port        = number<br/>    to_port          = number<br/>    cidr_blocks      = list(string)<br/>    ipv6_cidr_blocks = list(string)<br/>    prefix_list_ids  = list(string)<br/>    security_groups  = list(string)<br/>    self             = bool<br/>  }))</pre> | <pre>[<br/>  {<br/>    "cidr_blocks": [<br/>      "0.0.0.0/0"<br/>    ],<br/>    "description": "Allow all traffic Outbound",<br/>    "from_port": 0,<br/>    "ipv6_cidr_blocks": [],<br/>    "prefix_list_ids": [],<br/>    "protocol": "-1",<br/>    "security_groups": [],<br/>    "self": false,<br/>    "to_port": 0<br/>  }<br/>]</pre> | no |

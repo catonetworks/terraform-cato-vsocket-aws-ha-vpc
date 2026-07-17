@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Features
+- Added optional DHCP options for module-managed VPCs, including Cato DNS configuration support.
+
 ## 0.1.13 (2026-06-30)
 ### Changed
 - Updated Cato provider requirement to >= 0.0.88
