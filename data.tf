@@ -16,8 +16,14 @@ data "cato_accountSnapshotSite" "aws-site-primary" {
 ## Lookup data from region and VPC
 data "aws_ami" "vsocket" {
   most_recent = true
-  name_regex  = "VSOCKET_AWS"
+  name_regex  = "^VSOCKET_AWS.*$"
   owners      = ["aws-marketplace"]
+
+  # Exclude App Connector AMIs that share the VSOCKET_AWS name prefix.
+  filter {
+    name   = "product-code"
+    values = ["dvfhly9fuuu67tw59c7lt5t3c"]
+  }
 }
 
 data "aws_availability_zones" "available" {
