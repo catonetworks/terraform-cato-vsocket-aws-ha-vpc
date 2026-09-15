@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.15 (2026-09-15)
+### Fixed
+- Filter AWS Marketplace AMIs by the Cato vSocket product code to prevent App Connector AMIs from being launched.
+
 ## 0.1.14 (2026-07-17)
 ### Features
 - Added optional DHCP options for module-managed VPCs, including Cato DNS configuration support.
